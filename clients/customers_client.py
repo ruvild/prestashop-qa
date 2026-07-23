@@ -1,6 +1,5 @@
 from clients.base_client import BaseClient
 from schemas.customer_schemas import CustomerSearchResponse
-import json
 from schemas.customer_schemas import CustomerCreateRequest, CustomerCreateResponse
 from requests import Response
 from config.exceptions import CustomerNotFoundError
@@ -8,8 +7,8 @@ from config.exceptions import CustomerNotFoundError
 
 class CustomersClient(BaseClient):
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, auth_token) -> None:
+        super().__init__(auth_token)
         self.endpoint = "customers"
 
     def get_by_email(self, email: str) -> CustomerSearchResponse:
@@ -25,7 +24,7 @@ class CustomersClient(BaseClient):
 
         customer_data = next(iter(data.values()))
         print(
-            f"{'-'*10}Returned customer{'-'*10}\n{json.dumps(customer_data, indent=4)}\n{'-'*20}"
+            f"Customer {customer_data.get('email')} found, id: {customer_data.get('idCustomer')}"
         )
         return CustomerSearchResponse.model_validate(customer_data)
 
@@ -36,9 +35,9 @@ class CustomersClient(BaseClient):
         payload = customer.model_dump(exclude_none=True)
         res = self.session.post(url, headers=self.auth_header, json=payload)
         res.raise_for_status()
-        customer_data = res.json()
+        customer_data: dict = res.json()
         print(
-            f"{'-'*10}Posted customer{'-'*10}\n{json.dumps(customer_data, indent=4)}\n{'-'*20}"
+            f"Customer {customer_data.get('email')} created with id: {customer_data.get('customerId')}"
         )
         return CustomerCreateResponse.model_validate(customer_data)
 
@@ -50,4 +49,5 @@ class CustomersClient(BaseClient):
             json={"deleteMethod": "allow_registration_after"},
         )
         res.raise_for_status()
+        print(f"Customer with id <{customer_id}> deleted")
         return res

@@ -2,3 +2,7 @@ __pycache__/
 .venv
 .env
 reports
+binshopsrest/
+.vscode/
+.pytest_cache/
+local_env_setup.py
