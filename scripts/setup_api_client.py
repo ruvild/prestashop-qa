@@ -1,5 +1,5 @@
 import requests
-from config.utils import get_env
+from config.utils import get_env, url_joiner
 import subprocess
 from config.permissions import ALL_PERMISSIONS
 
@@ -85,7 +85,9 @@ class ApiClientSetup:
             "scope[]": ALL_PERMISSIONS,
         }
         res = requests.post(
-            f"{self.base_url}admin-api/access_token", data=payload, timeout=30
+            f"{url_joiner(self.base_url,'admin-api/access_token')}",
+            data=payload,
+            timeout=30,
         )
         res.raise_for_status()
         access_token = res.json()["access_token"]

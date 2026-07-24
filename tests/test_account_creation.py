@@ -20,7 +20,7 @@ def test_register_required_ui(page, cleanup_customer, customers_client):
 
     cleanup_customer["email"] = customer.email
 
-    expect(page).to_have_url(current_page.base_url)
+    expect(page).to_have_url(current_page.url)
     expect(current_page.account_header).to_be_visible()
 
     saved_customer = customers_client.get_by_email(customer.email)
@@ -42,7 +42,7 @@ def test_register_optionals_ui(page, cleanup_customer, customers_client):
 
     cleanup_customer["email"] = customer.email
 
-    expect(page).to_have_url(current_page.base_url)
+    expect(page).to_have_url(current_page.url)
     expect(current_page.account_header).to_be_visible()
 
     saved_customer = customers_client.get_by_email(customer.email)
