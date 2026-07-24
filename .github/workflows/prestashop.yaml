@@ -39,8 +39,8 @@ jobs:
         env:
           CI: "true"
           BASE_URL: "http://localhost:8080"
-          DB_NAME="prestashop"
-          DB_USER="root"
+          DB_NAME: "prestashop"
+          DB_USER: "root"
 
       - name: Upload Pytest HTML Report
         if: always()
