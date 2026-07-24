@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  prestashop-tester:
     runs-on: ubuntu-latest    
 
     steps:
@@ -24,6 +24,21 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-all-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install All Playwright Browsers & OS Dependencies
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: playwright install --with-deps
+
+      - name: Install OS Dependencies (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: playwright install-deps
 
       - name: Checkout Binshops REST module
         uses: actions/checkout@v7
@@ -35,7 +50,7 @@ jobs:
       - name: Run Pytest Suite
         run: |          
           export DB_ROOT_PASSWORD=$(openssl rand -hex 16)
-          pytest -n auto --reruns 2 --reruns-delay 1 --screenshot=only-on-failure --output=screenshots       
+          pytest -n auto --browser chromium --browser firefox --browser webkit --reruns 2 --reruns-delay 1 --screenshot=only-on-failure --output=screenshots       
         env:
           CI: "true"
           BASE_URL: "http://localhost:8080"
@@ -61,6 +76,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
+          archive: false
           name: docker-debug-logs
           path: logs/
       
