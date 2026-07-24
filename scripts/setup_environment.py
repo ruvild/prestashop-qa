@@ -39,14 +39,17 @@ def _wait_until_ready() -> None:
     start = time.time()
     while True:
         try:
-            requests.get(BASE_URL, timeout=5)
-            print("\nPrestaShop is up and responding!")
-            break
+            res = requests.get(BASE_URL, timeout=5)
+            if res.ok:
+                print("\nPrestaShop is up and responding!")
+                break
         except requests.RequestException:
-            if time.time() - start > 300:
-                raise TimeoutError("PrestaShop failed to start within 5 minutes.")
             print("Waiting for PrestaShop container initialization...")
-            time.sleep(5)
+
+        if time.time() - start > 300:
+            raise TimeoutError("PrestaShop failed to start within 5 minutes.")
+
+        time.sleep(5)
 
 
 def _disable_admin_security() -> None:
