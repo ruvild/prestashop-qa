@@ -28,7 +28,7 @@ jobs:
       - name: Checkout Binshops REST module
         uses: actions/checkout@v7
         with:
-          repository: 'binshops/binshopsrest'
+          repository: 'binshops/prestashop-rest'
           ref: 'c9007fbff64daed488a51267ff66fb9bf903c41f'
           path: 'binshopsrest'
 
@@ -39,8 +39,8 @@ jobs:
         env:
           CI: "true"
           BASE_URL: "http://localhost:8080"
-          DB_NAME="prestashop"
-          DB_USER="root"
+          DB_NAME: "prestashop"
+          DB_USER: "root"
 
       - name: Upload Pytest HTML Report
         if: always()
