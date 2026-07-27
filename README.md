@@ -146,6 +146,7 @@ as configured in `pytest.ini`.
 
 *Figure 2: Standalone HTML execution report showing pass/fail metrics and execution timing.*
 
+---
 
 # 🐛 Discovered & Reported Defects
 
