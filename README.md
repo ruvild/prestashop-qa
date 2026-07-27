@@ -38,6 +38,7 @@ A containerized testing framework for **PrestaShop** (with the additional **Bins
 * **Automated CI/CD:** GitHub Actions pipeline features intelligent caching for Playwright dependencies and automatic artifact capture (failure screenshots, server logs, and HTML reports). The test suite runs automatically on every push or pull request via GitHub Actions.
 
 ![GitHub Actions Pipeline Run](docs/assets/ci_pipeline_steps.png)
+
 *Figure 1: Automated multi-browser execution and artifact collection in GitHub Actions.*
 
 ---
@@ -142,6 +143,7 @@ reports/report.html
 as configured in `pytest.ini`.
 
 ![Pytest HTML Report Preview](docs/assets/html_report_preview.png)
+
 *Figure 2: Standalone HTML execution report showing pass/fail metrics and execution timing.*
 
 
