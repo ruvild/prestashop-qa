@@ -50,6 +50,7 @@ prestashop-qa/
 │   └── prestashop.yaml         # GitHub Actions CI/CD pipeline definition
 ├── clients/                    # API clients and HTTP session wrappers
 ├── config/                     # Helper utilities, constants, and API permission matrices
+├── docs/assets/                # README Images
 ├── factories/                  # Test data generators
 ├── models/                     # Data models for UI form inputs
 ├── pages/                      # Page Object Model (POM) representations

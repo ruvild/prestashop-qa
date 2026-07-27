@@ -50,6 +50,7 @@ prestashop-qa/
 │   └── prestashop.yaml         # Определение конвейера CI/CD для GitHub Actions
 ├── clients/                    # API-клиенты и обертки для HTTP-сессий
 ├── config/                     # Вспомогательные утилиты, константы и матрицы прав доступа к API
+├── docs/assets/                # Изображения для README
 ├── factories/                  # Генераторы тестовых данных
 ├── models/                     # Модели данных для полей форм UI
 ├── pages/                      # Реализация паттерна Page Object Model (POM)
