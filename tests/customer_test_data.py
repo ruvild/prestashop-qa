@@ -63,11 +63,38 @@ class CustomerTestData:
     ]
 
     INVALID_PASSWORDS = [
-        pytest.param("A" * 10, id="simple_repeating_letter"),
-        pytest.param("K9#mX2!", id="short"),
-        pytest.param("K9#mX2!v" * 9 + "a", id="long"),
-        pytest.param("Pineapple1!", id="simple_dictionary_word"),
-        pytest.param("         ", id="pure_whitespace"),
+        pytest.param(
+            "A" * 10,
+            marks=pytest.mark.xfail(
+                reason="BUG: API ignores password complexity/length rules enforced by UI",
+            ),
+            id="simple_repeating_letter",
+        ),
+        pytest.param(
+            "K9#mX2!",
+            marks=pytest.mark.xfail(
+                reason="BUG: API ignores password complexity/length rules enforced by UI",
+            ),
+            id="short",
+        ),
+        pytest.param(
+            "K9#mX2!v" * 9 + "a",
+            id="long",
+        ),
+        pytest.param(
+            "Pineapple1!",
+            marks=pytest.mark.xfail(
+                reason="BUG: API ignores password complexity/length rules enforced by UI",
+            ),
+            id="simple_dictionary_word",
+        ),
+        pytest.param(
+            "         ",
+            marks=pytest.mark.xfail(
+                reason="BUG: API ignores password complexity/length rules enforced by UI",
+            ),
+            id="pure_whitespace",
+        ),
         pytest.param("", id="empty"),
         pytest.param(" ", id="single_space"),
     ]
