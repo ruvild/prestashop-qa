@@ -149,9 +149,6 @@ def test_register_valid_password_field(valid_value, cleanup_customer, customers_
     assert saved_customer.email == customer.email
 
 
-@pytest.mark.xfail(
-    reason="BUG: API ignores password complexity/length rules enforced by UI",
-)
 @pytest.mark.parametrize("invalid_value", CustomerTestData.INVALID_PASSWORDS)
 def test_register_invalid_password_field(
     invalid_value, cleanup_customer, customers_client
