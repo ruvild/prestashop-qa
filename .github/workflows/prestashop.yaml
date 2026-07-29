@@ -53,7 +53,7 @@ jobs:
           pytest -n auto --browser chromium --browser firefox --browser webkit --reruns 2 --reruns-delay 1 --screenshot=only-on-failure --output=screenshots       
         env:
           CI: "true"
-          BASE_URL: "http://localhost:8080"
+          BASE_URL: "http://localhost:8080/"
           DB_NAME: "prestashop"
           DB_USER: "root"
 

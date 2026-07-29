@@ -23,7 +23,7 @@ A containerized testing framework for **PrestaShop** (with the additional **Bins
 ## 🚧 Test Suite Progress & Roadmap
 
 - 🟩 **Account Creation Flow** — *Completed (UI & API)*
-- 🚧 **Authentication / Login** — *In Progress / Planned*
+- 🟩 **Authentication / Login** — *Completed (Hybrid UI/API)*
 - 🚧 **Main / Home Page Navigation** — *In Progress / Planned*
 - 🚧 **Product Browsing & Search** — *In Progress / Planned*
 - 🚧 **Full Checkout Flow** — *In Progress / Planned*
@@ -150,12 +150,13 @@ as configured in `pytest.ini`.
 
 # 🐛 Discovered & Reported Defects
 
-During development, several defects were identified and reported to the official [PrestaShop Repository](https://github.com/PrestaShop/PrestaShop). The corresponding tests are retained in this project as regression tests using `pytest.mark.xfail` where appropriate.
+During development, several defects were identified and reported to the official [PrestaShop](https://github.com/PrestaShop/PrestaShop) and [Binshops Plugin](https://github.com/binshops/prestashop-rest) repositories. The corresponding tests are retained in this project as regression tests using `pytest.mark.xfail` where appropriate.
 
 * 🐛 [#42129](https://github.com/PrestaShop/PrestaShop/issues/42129) — Disparity between UI and API password rules
 * 🐛 [#42130](https://github.com/PrestaShop/PrestaShop/issues/42130) — Possible to create a customer with a non-existent group
 * 🐛 [#42131](https://github.com/PrestaShop/PrestaShop/issues/42131) — Inconsistent key casing between payloads
-* 🐛 [#42132](https://github.com/PrestaShop/PrestaShop/issues/42132) — Admin API - Inconsistent Whitespace Sanitization
+* 🐛 [#42132](https://github.com/PrestaShop/PrestaShop/issues/42132) — Inconsistent whitespace Sanitization
 * 🐛 [#42133](https://github.com/PrestaShop/PrestaShop/issues/42133) — Registration Page name fields descriptions are missing hyphen as an allowed character
+* 🐛 [#55](https://github.com/binshops/prestashop-rest/issues/55) — Login endpoint crashes in PrestaShop 9.2.0
 
 > 🔗 **View All Submitted Reports:** [PrestaShop Issue Tracker](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild)

@@ -15,6 +15,9 @@ class BasePage:
         self.page = page
         self.sign_in_header = page.get_by_label("Sign in")
         self.account_header = page.get_by_label("View my account")
+        self.sign_out_link = page.locator(
+            '[aria-labelledby="userMenuButton"]'
+        ).get_by_role("link", name="Sign out")
 
     @property
     def url(self) -> str:
@@ -29,3 +32,8 @@ class BasePage:
 
         self.sign_in_header.click()
         return LoginPage(self.page)
+
+    def log_out(self) -> Self:
+        self.account_header.click()
+        self.sign_out_link.click()
+        return self

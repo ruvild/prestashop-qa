@@ -11,20 +11,20 @@ class CustomersClient(BaseClient):
         super().__init__(auth_token)
         self.endpoint = "customers"
 
-    def get_by_email(self, email: str) -> CustomerSearchResponse:
+    def search_customer(self, query: int | str) -> CustomerSearchResponse:
         url = self.build_url(f"{self.endpoint}/search")
-        params = {"phrases[]": email}
+        params = {"phrases[]": query}
 
         res = self.session.get(url, headers=self.auth_header, params=params)
         res.raise_for_status()
         data = res.json()
 
         if not data:
-            raise CustomerNotFoundError(f"No customer found with email: {email}")
+            raise CustomerNotFoundError(f"No customer found by searching <{query}>")
 
         customer_data = next(iter(data.values()))
         print(
-            f"Customer {customer_data.get('email')} found, id: {customer_data.get('idCustomer')}"
+            f"Customer with id <{customer_data.get('idCustomer')}> found, email: {customer_data.get('email')}"
         )
         return CustomerSearchResponse.model_validate(customer_data)
 
@@ -41,7 +41,7 @@ class CustomersClient(BaseClient):
         )
         return CustomerCreateResponse.model_validate(customer_data)
 
-    def delete_customer(self, customer_id) -> Response:
+    def delete_customer(self, customer_id: int) -> Response:
         url = self.build_url(f"{self.endpoint}/{customer_id}")
         res = self.session.delete(
             url,
