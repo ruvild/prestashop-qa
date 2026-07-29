@@ -24,9 +24,9 @@ A containerized testing framework for **PrestaShop** (with the additional **Bins
 
 - 🟩 **Account Creation Flow** — *Completed (UI & API)*
 - 🟩 **Authentication / Login** — *Completed (Hybrid UI/API)*
-- 🚧 **Main / Home Page Navigation** — *In Progress / Planned*
-- 🚧 **Product Browsing & Search** — *In Progress / Planned*
-- 🚧 **Full Checkout Flow** — *In Progress / Planned*
+- 🚧 **Main / Home Page Navigation** — *Planned*
+- 🚧 **Product Browsing & Search** — *Planned*
+- 🚧 **Full Checkout Flow** — *Planned*
 
 ---
 
