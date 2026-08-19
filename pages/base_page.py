@@ -30,6 +30,15 @@ class BasePage:
         self.search_results_list = page.get_by_label("Search results")
         self.searched_products = self.search_results_list.get_by_role("option")
 
+        self.footer = page.locator("#footer")
+        self.product_footer = self.footer.get_by_role("navigation", name="Products")
+        self.company_footer = self.footer.get_by_role("navigation", name="Our company")
+        self.account_footer = self.footer.get_by_role("navigation", name="Your account")
+        self.store_info_footer = self.footer.get_by_role(
+            "region", name="Store information"
+        )
+        self.sign_in_footer = self.account_footer.get_by_role("link", name="Sign in")
+
     @property
     def url(self) -> str:
         return url_joiner(self.base_url, self.endpoint)
@@ -38,7 +47,7 @@ class BasePage:
         self.page.goto(self.url)
         return self
 
-    def go_to_login_page(self) -> LoginPage:
+    def go_to_login_page_via_header(self) -> LoginPage:
         from pages.login_page import LoginPage
 
         self.sign_in_header.click()
@@ -56,3 +65,9 @@ class BasePage:
     def search_product(self, product_name: str) -> Self:
         self.search_bar.fill(product_name)
         return self
+
+    def go_to_login_page_via_footer(self) -> LoginPage:
+        from pages.login_page import LoginPage
+
+        self.sign_in_footer.click()
+        return LoginPage(self.page)
