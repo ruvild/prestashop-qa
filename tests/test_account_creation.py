@@ -13,7 +13,7 @@ def test_register_required_ui(page, cleanup_customer, customers_client):
     current_page = (
         BasePage(page)
         .navigate()
-        .go_to_login_page()
+        .go_to_login_page_via_header()
         .create_account()
         .register_valid(customer)
     )

@@ -25,6 +25,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(playwright --version)" >> "$GITHUB_OUTPUT"
+
       - name: Cache Playwright Browsers
         uses: actions/cache@v6
         id: playwright-cache
