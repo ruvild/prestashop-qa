@@ -1,5 +1,10 @@
 from clients.base_client import BaseClient
-from schemas.product_schemas import ProductCreateRequest, ProductResponse
+from schemas.product_schemas import (
+    ProductCreateRequest,
+    ProductResponse,
+    ProductPatchRequest,
+)
+from requests import Response
 
 
 class ProductsClient(BaseClient):
@@ -12,8 +17,27 @@ class ProductsClient(BaseClient):
         payload = product.model_dump(exclude_none=True)
         res = self.session.post(url, headers=self.auth_header, json=payload)
         res.raise_for_status()
+
         product_data: dict = res.json()
         print(
             f"Product {product_data['names']['en-US']} created with id: {product_data.get('productId')}"
         )
+        return ProductResponse.model_validate(product_data)
+
+    def delete_product(self, product_id: int) -> Response:
+        url = self.build_url(f"{self.endpoint}/{product_id}")
+        res = self.session.delete(url, headers=self.auth_header)
+        res.raise_for_status()
+
+        print(f"Product with id <{product_id}> deleted")
+        return res
+
+    def update_product(self, product_id: int, patch_data: ProductPatchRequest):
+        url = self.build_url(f"{self.endpoint}/{product_id}")
+        payload: dict["str", "str"] = patch_data.model_dump(exclude_none=True)
+        res = self.session.patch(url, headers=self.auth_header, json=payload)
+        res.raise_for_status()
+
+        product_data: dict = res.json()
+        print(f"Product with id <{product_id}> updated with new data: {payload}")
         return ProductResponse.model_validate(product_data)

@@ -3,6 +3,9 @@ from collections.abc import Generator, Callable
 from factories.customer_factory import CustomerFactory
 from schemas.customer_schemas import CustomerCreateRequest
 
+from factories.product_factory import ProductFactory
+from schemas.product_schemas import ProductResponse, ProductPatchRequest
+
 
 @pytest.fixture()
 def cleanup_customer(customers_client) -> Generator[Callable[[int], None], None, None]:
@@ -32,3 +35,29 @@ def _delete_customer(customers_client, customer_id: int) -> None:
         customers_client.delete_customer(customer_id)
     except Exception as e:
         print(f"\n[Teardown Warning] Failed to delete customer {customer_id}: {e}")
+
+
+@pytest.fixture
+def default_product(products_client) -> Generator[ProductResponse, None, None]:
+    client = products_client
+    product = ProductFactory().create_base_product()
+    response = client.create_product(product)
+    product_id = response.productId
+
+    try:
+        baseline_patch_data = {
+            "enabled": True,
+            "descriptions": {"en-US": "This is a beautiful mug for testing."},
+            "priceTaxExcluded": 10.0,
+            "reference": "test_mug",
+        }
+        validated_data = ProductPatchRequest.model_validate(baseline_patch_data)
+
+        patch_response = client.update_product(product_id, validated_data)
+
+        yield patch_response
+    finally:
+        try:
+            client.delete_product(product_id)
+        except Exception as e:
+            print(f"\n[Teardown Warning] Failed to delete product {product_id}: {e}")

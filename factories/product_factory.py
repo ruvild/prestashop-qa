@@ -5,4 +5,4 @@ class ProductFactory:
 
     @staticmethod
     def create_base_product() -> ProductCreateRequest:
-        return ProductCreateRequest(type="standard", names={"en-US": "Mug"})
+        return ProductCreateRequest(type="standard", names={"en-US": "Test Mug"})

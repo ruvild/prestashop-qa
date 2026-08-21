@@ -1,7 +1,7 @@
-from factories.product_factory import ProductFactory
+import json
 
 
-def test_product(products_client):
-    product = ProductFactory.create_base_product()
-    product_response = products_client.create_product(product)
-    assert "productId" in product_response.model_dump()
+def test_product(default_product):
+    response = default_product
+    data = response.model_dump()
+    print(json.dumps(data, indent=4))

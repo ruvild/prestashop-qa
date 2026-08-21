@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Literal
 
 
@@ -14,6 +14,8 @@ class ProductCategory(BaseModel):
 
 
 class ProductPatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     enabled: bool | None = None
     descriptions: dict[str, str] | None = None
     priceTaxExcluded: float | None = None
@@ -24,6 +26,7 @@ class ProductPatchRequest(BaseModel):
 
 
 class ProductResponse(ProductCreateRequest):
+
     productId: int
     enabled: bool
     descriptions: dict[str, str]
