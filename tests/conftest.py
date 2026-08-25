@@ -47,15 +47,18 @@ def default_product(products_client) -> Generator[ProductResponse, None, None]:
     try:
         baseline_patch_data = {
             "enabled": True,
-            "descriptions": {"en-US": "This is a beautiful mug for testing."},
+            "descriptions": {
+                "en-US": "This is a beautiful mug for testing. Perfect for a well-deserved break."
+            },
+            "shortDescriptions": {"en-US": "This is a mug."},
             "priceTaxExcluded": 10.0,
             "reference": "test_mug",
         }
-        validated_data = ProductPatchRequest.model_validate(baseline_patch_data)
 
-        patch_response = client.update_product(product_id, validated_data)
+        patch_response = client.update_product(product_id, baseline_patch_data)
 
         yield patch_response
+
     finally:
         try:
             client.delete_product(product_id)

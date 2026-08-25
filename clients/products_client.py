@@ -32,9 +32,10 @@ class ProductsClient(BaseClient):
         print(f"Product with id <{product_id}> deleted")
         return res
 
-    def update_product(self, product_id: int, patch_data: ProductPatchRequest):
+    def update_product(self, product_id: int, patch_data: dict):
         url = self.build_url(f"{self.endpoint}/{product_id}")
-        payload: dict["str", "str"] = patch_data.model_dump(exclude_none=True)
+        validated_patch_data = ProductPatchRequest.model_validate(patch_data)
+        payload: dict["str", "str"] = validated_patch_data.model_dump(exclude_none=True)
         res = self.session.patch(url, headers=self.auth_header, json=payload)
         res.raise_for_status()
 
