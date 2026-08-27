@@ -8,9 +8,12 @@ class HomePage(BasePage):
         super().__init__(page)
 
         self.carousel = page.get_by_label("Carousel container")
-        self.featured_products = page.locator(".ps-featuredproducts")
-        self.special_deals = page.locator(".ps-specials")
-        self.featured_product = self.featured_products.locator(f"[data-id-product='1']")
+        self.featured_products_block = page.locator(".ps-featuredproducts")
+        self.special_deals_block = page.locator(".ps-specials")
+        self.latest_arrivals_block = page.locator(".ps-newproducts")
+        self.featured_product = self.featured_products_block.locator(
+            "[data-id-product='1']"
+        )
 
         self.quick_view_button = self.featured_product.get_by_role(
             "button", name="Quick view"
@@ -21,6 +24,9 @@ class HomePage(BasePage):
 
     def get_featured_product(self) -> Locator:
         return self.featured_product
+
+    def get_new_product(self, product_id: int) -> Locator:
+        return self.latest_arrivals_block.locator(f"[data-id-product='{product_id}']")
 
     def open_quick_view(self) -> Locator:
         self.featured_product.hover()

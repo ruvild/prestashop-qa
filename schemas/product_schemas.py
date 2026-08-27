@@ -18,6 +18,7 @@ class ProductPatchRequest(BaseModel):
 
     enabled: bool | None = None
     descriptions: dict[str, str] | None = None
+    shortDescriptions: dict[str, str] | None = None
     priceTaxExcluded: float | None = None
     onSale: bool | None = None
     visibility: Literal["both", "catalog", "search", "none"] | None = None

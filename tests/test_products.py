@@ -23,3 +23,15 @@ def test_product_quick_view(page):
 
     expect(product_page.product_title).to_have_text(product_name)
     expect(product_page.add_to_cart_button).to_be_visible()
+
+
+def test_new_product(page, default_product, products_client):
+
+    new_product_id = default_product.productId
+    current_page = HomePage(page).navigate()
+    new_product = current_page.get_new_product(new_product_id)
+    expect(new_product).to_be_visible()
+
+    products_client.delete_product(new_product_id)
+    page.reload()
+    expect(new_product).not_to_be_visible()

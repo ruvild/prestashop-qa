@@ -31,8 +31,8 @@ def test_main_elements_ui(page):
     current_page = HomePage(page).navigate()
 
     expect(current_page.carousel).to_be_visible()
-    expect(current_page.featured_products).to_be_visible()
-    expect(current_page.special_deals).to_be_visible()
+    expect(current_page.featured_products_block).to_be_visible()
+    expect(current_page.special_deals_block).to_be_visible()
 
 
 def test_footer_ui(page):

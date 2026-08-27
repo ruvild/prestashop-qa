@@ -35,7 +35,7 @@ class ProductsClient(BaseClient):
     def update_product(self, product_id: int, patch_data: dict):
         url = self.build_url(f"{self.endpoint}/{product_id}")
         validated_patch_data = ProductPatchRequest.model_validate(patch_data)
-        payload: dict["str", "str"] = validated_patch_data.model_dump(exclude_none=True)
+        payload: dict = validated_patch_data.model_dump(exclude_none=True)
         res = self.session.patch(url, headers=self.auth_header, json=payload)
         res.raise_for_status()
 
