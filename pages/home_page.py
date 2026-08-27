@@ -25,7 +25,7 @@ class HomePage(BasePage):
     def get_featured_product(self) -> Locator:
         return self.featured_product
 
-    def get_new_product(self, product_id: int) -> Locator:
+    def get_product_from_new_arrivals(self, product_id: int) -> Locator:
         return self.latest_arrivals_block.locator(f"[data-id-product='{product_id}']")
 
     def open_quick_view(self) -> Locator:

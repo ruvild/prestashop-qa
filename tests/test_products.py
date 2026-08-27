@@ -1,3 +1,4 @@
+from pages.base_page import BasePage
 from pages.home_page import HomePage
 from playwright.sync_api import expect
 
@@ -29,9 +30,15 @@ def test_new_product(page, default_product, products_client):
 
     new_product_id = default_product.productId
     current_page = HomePage(page).navigate()
-    new_product = current_page.get_new_product(new_product_id)
-    expect(new_product).to_be_visible()
+    new_product_banner = current_page.get_product_from_new_arrivals(new_product_id)
+    expect(new_product_banner).to_be_visible()
 
     products_client.delete_product(new_product_id)
     page.reload()
-    expect(new_product).not_to_be_visible()
+    expect(new_product_banner).not_to_be_visible()
+
+
+def test_category_page(page):
+    current_page = BasePage(page).navigate().navigate_to_category_page()
+    expect(current_page.filter_block).to_be_visible()
+    expect(current_page.product_section).to_be_visible()

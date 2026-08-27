@@ -5,6 +5,7 @@ from config.utils import url_joiner, get_env
 
 if TYPE_CHECKING:
     from pages.login_page import LoginPage
+    from pages.category_page import CategoryPage
 
 
 class BasePage:
@@ -71,3 +72,12 @@ class BasePage:
 
         self.sign_in_footer.click()
         return LoginPage(self.page)
+
+    def navigate_to_category_page(
+        self, category: str = "Accessories", subcategory: str = "Home Accessories"
+    ) -> CategoryPage:
+        from pages.category_page import CategoryPage
+
+        self.top_menu.get_by_role("link", name=f"{category}", exact=True).hover()
+        self.top_menu.get_by_role("link", name=f"{subcategory}", exact=True).click()
+        return CategoryPage(self.page)
