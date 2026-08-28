@@ -4,7 +4,7 @@ from pages.registration_page import RegistrationPage
 from factories.customer_factory import CustomerFactory
 import pytest
 from requests import HTTPError
-from tests.customer_test_data import CustomerTestData
+from test_data.customer_test_data import CustomerTestData
 
 
 def test_register_required_ui(page, cleanup_customer, customers_client):

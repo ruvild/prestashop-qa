@@ -1,4 +1,4 @@
-from clients.base_client import BaseClient
+from clients.admin_api.base_client import BaseClient
 from schemas.product_schemas import (
     ProductCreateRequest,
     ProductResponse,

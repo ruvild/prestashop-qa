@@ -1,5 +1,5 @@
 from pages.base_page import BasePage
-from models.customer import CustomerRegistrationUI
+from schemas.customer_schemas import CustomerRegistrationUI
 from typing import Self
 
 

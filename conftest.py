@@ -2,8 +2,8 @@ import pytest
 from collections.abc import Generator
 from scripts.setup_api_client import ApiClientSetup
 from scripts.setup_environment import ensure_environment
-from clients.customers_client import CustomersClient
-from clients.products_client import ProductsClient
+from clients.admin_api.customers_client import CustomersClient
+from clients.admin_api.products_client import ProductsClient
 import os
 
 

@@ -1,6 +1,10 @@
 from pages.base_page import BasePage
 from pages.home_page import HomePage
 from playwright.sync_api import expect
+from config.utils import extract_product_ids
+from test_data.category_test_data import HOME_ACCESSORIES
+import requests
+import json
 
 
 def test_product_navigation(page):
@@ -38,7 +42,49 @@ def test_new_product(page, default_product, products_client):
     expect(new_product_banner).not_to_be_visible()
 
 
-def test_category_page(page):
+def test_category_page_navigation(page):
     current_page = BasePage(page).navigate().navigate_to_category_page()
     expect(current_page.filter_block).to_be_visible()
     expect(current_page.product_section).to_be_visible()
+
+
+def test_filters_ui(page, subcategory=HOME_ACCESSORIES):
+    current_page = (
+        BasePage(page).navigate().navigate_to_category_page(subcategory=subcategory)
+    )
+
+    filtered_products_ids_ui = [
+        product.get_attribute("data-id-product")
+        for product in current_page.filtered_products.all()
+    ]
+    res = page.request.get(
+        f"{current_page.base_url}rest/categoryProducts?id_category={subcategory.id}"
+    )
+    expect(res).to_be_ok()
+
+    filtered_products_ids_api = {
+        product["id_product"] for product in res.json()["psdata"]["products"]
+    }
+
+    assert (
+        set(extract_product_ids(filtered_products_ids_ui)) == filtered_products_ids_api
+    )
+
+
+def test_filters_api(auth_key, subcategory=HOME_ACCESSORIES):
+    res = requests.get(
+        f"http://localhost:8080/rest/categoryProducts?id_category={subcategory.id}"
+    )
+    id_set_bin = {product["id_product"] for product in res.json()["psdata"]["products"]}
+
+    response = requests.get(
+        "http://localhost:8080/admin-api/products",
+        headers={"Authorization": f"Bearer {auth_key}"},
+    )
+    id_set_prest = {
+        product["productId"]
+        for product in response.json()["items"]
+        if product["category"] == subcategory.name
+    }
+
+    assert id_set_bin == id_set_prest

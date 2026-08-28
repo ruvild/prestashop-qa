@@ -1,4 +1,4 @@
-from clients.base_client import BaseClient
+from clients.admin_api.base_client import BaseClient
 from schemas.customer_schemas import CustomerSearchResponse
 from schemas.customer_schemas import CustomerCreateRequest, CustomerCreateResponse
 from requests import Response

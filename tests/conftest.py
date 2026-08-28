@@ -2,9 +2,8 @@ import pytest
 from collections.abc import Generator, Callable
 from factories.customer_factory import CustomerFactory
 from schemas.customer_schemas import CustomerCreateRequest
-
 from factories.product_factory import ProductFactory
-from schemas.product_schemas import ProductResponse, ProductPatchRequest
+from schemas.product_schemas import ProductResponse
 
 
 @pytest.fixture()
