@@ -7,12 +7,6 @@ class TestCategory:
     id: int
 
 
-@dataclass(frozen=True)
-class TestSubcategory:
-    name: str
-    id: int
-
-
 ACCESSORIES = TestCategory("Accessories", 6)
-STATIONERY = TestSubcategory("Stationery", 7)
-HOME_ACCESSORIES = TestSubcategory("Home Accessories", 8)
+STATIONERY = TestCategory("Stationery", 7)
+HOME_ACCESSORIES = TestCategory("Home Accessories", 8)

@@ -5,6 +5,7 @@ from schemas.product_schemas import (
     ProductPatchRequest,
 )
 from requests import Response
+from test_data.category_test_data import TestCategory, HOME_ACCESSORIES
 
 
 class ProductsClient(BaseClient):
@@ -42,3 +43,15 @@ class ProductsClient(BaseClient):
         product_data: dict = res.json()
         print(f"Product with id <{product_id}> updated with new data: {payload}")
         return ProductResponse.model_validate(product_data)
+
+    def filter_products_by_category(self, category: TestCategory) -> set[int]:
+        url = self.build_url(self.endpoint)
+        res = self.session.get(url, headers=self.auth_header)
+        res.raise_for_status()
+
+        data: dict = res.json()
+        return {
+            product["productId"]
+            for product in data["items"]
+            if product["category"] == category.name
+        }
