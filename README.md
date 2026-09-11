@@ -68,9 +68,9 @@ prestashop-qa/
 
 ## Requirements
 
-- Python **3.14** (or **3.11+**)
+- Python **3.14**
 - Docker Engine **29.0+**
-- Docker Compose **v5.0+**
+- Docker Compose **5.0+**
 
 ## 1. Installation
 
@@ -159,4 +159,4 @@ During development, several defects were identified and reported to the official
 * 🐛 [#42133](https://github.com/PrestaShop/PrestaShop/issues/42133) — Registration Page name fields descriptions are missing hyphen as an allowed character
 * 🐛 [#55](https://github.com/binshops/prestashop-rest/issues/55) — Login endpoint crashes in PrestaShop 9.2.0
 
-> 🔗 **View All Submitted Reports:** [PrestaShop Issue Tracker](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild)
+> 🔗 **View All Submitted Reports:** [PrestaShop Issue Tracker](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild), [Binshops Issue Tracker](https://github.com/binshops/prestashop-rest/issues?q=is%3Aissue+author%3Aruvild)

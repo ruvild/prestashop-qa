@@ -68,9 +68,9 @@ prestashop-qa/
 
 ## Требования
 
-- Python **3.14** (или **3.11+**)
+- Python **3.14+**
 - Docker Engine **29.0+**
-- Docker Compose **v5.0+**
+- Docker Compose **5.0+**
 
 ## 1. Установка
 
@@ -157,4 +157,4 @@ reports/report.html
 * 🐛 [#42133](https://github.com/PrestaShop/PrestaShop/issues/42133) — В описании именных полей на странице регистрации дефис не указан как допустимый символ
 * 🐛 [#55](https://github.com/binshops/prestashop-rest/issues/55) — Сбой эндпоинта входа в PrestaShop 9.2.0
 
-> 🔗 **Посмотреть все отправленные отчеты:** [Трекер задач PrestaShop](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild)
+> 🔗 **Посмотреть все отправленные отчеты:** [Трекер задач PrestaShop](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild), [Трекер задач Binshops](https://github.com/binshops/prestashop-rest/issues?q=is%3Aissue+author%3Aruvild)
