@@ -53,10 +53,10 @@ prestashop-qa/
 ├── config/                     # Helper utilities, constants, and API permission matrices
 ├── docs/assets/                # README Images
 ├── factories/                  # Test data generators
-├── models/                     # Data models for UI form inputs
 ├── pages/                      # Page Object Model (POM) representations
-├── schemas/                    # Pydantic contract schemas for API response validation
+├── schemas/                    # Pydantic models for API requests, responses, and UI data
 ├── scripts/                    # Environment provisioning & API client initialization scripts
+├── test_data/                  # Test data and predefined input values
 ├── tests/                      # UI & API test modules, test data, and scoped fixtures
 ├── .gitignore                  # Git tracking rules
 ├── compose.yaml                # PrestaShop & MySQL container orchestration
