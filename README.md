@@ -83,24 +83,30 @@ cd prestashop-qa
 pip install -r requirements.txt
 ```
 
-## 2. Environment Provisioning
+## 2. Configure Environment Variables
+
+Create a `.env` file in the project root with the required environment variables:
+
+```dotenv
+BASE_URL=http://localhost:8080
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_ROOT_PASSWORD=your_database_root_password
+```
+
+These variables are used by the environment provisioning.
+
+## 3. Environment Provisioning
 
 The framework includes an automated setup script that:
 
-- Starts the Docker containers.
-- Waits for PrestaShop to initialize.
-- Automatically disables HTTPS/TLS enforcement on the Admin API for debug-mode testing.
+* Installs the Playwright browser binaries required for UI tests.
+* Clones the pinned version of the Binshops REST API module required by the test environment.
+* Starts the Docker containers.
+* Waits for PrestaShop to initialize.
+* Automatically disables HTTPS/TLS enforcement on the Admin API for debug-mode testing.
 
-To provision the environment locally, create a small helper script:
-
-```python
-from scripts.setup_environment import ensure_environment
-
-if __name__ == "__main__":
-    ensure_environment()
-```
-
-Save it as `local_env_setup.py`, then execute:
+To provision the environment locally, execute:
 
 ```bash
 python local_env_setup.py
