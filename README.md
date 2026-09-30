@@ -106,7 +106,16 @@ The framework includes an automated setup script that:
 * Waits for PrestaShop to initialize.
 * Automatically disables HTTPS/TLS enforcement on the Admin API for debug-mode testing.
 
-To provision the environment locally, execute:
+To provision the environment locally, create a small helper script:
+
+```python
+from scripts.setup_environment import ensure_environment
+
+if __name__ == "__main__":
+    ensure_environment()
+```
+
+Save it as `local_env_setup.py`, then execute:
 
 ```bash
 python local_env_setup.py

@@ -106,7 +106,16 @@ DB_ROOT_PASSWORD=your_database_root_password
 * Ожидает завершения инициализации PrestaShop.
 * Автоматически отключает принудительное использование HTTPS/TLS для Admin API в режиме отладки.
 
-Для настройки окружения локально выполните:
+Для подготовки окружения локально создайте небольшой вспомогательный скрипт:
+
+```python
+from scripts.setup_environment import ensure_environment
+
+if __name__ == "__main__":
+    ensure_environment()
+```
+
+Сохраните его под именем `local_env_setup.py`, а затем выполните команду:
 
 ```bash
 python local_env_setup.py
