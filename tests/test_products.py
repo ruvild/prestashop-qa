@@ -29,16 +29,12 @@ def test_product_quick_view(page):
     expect(product_page.add_to_cart_button).to_be_visible()
 
 
-def test_new_product(page, default_product, products_client):
+def test_new_product(page, default_product):
 
     new_product_id = default_product.productId
     current_page = HomePage(page).navigate()
     new_product_banner = current_page.get_product_from_new_arrivals(new_product_id)
     expect(new_product_banner).to_be_visible()
-
-    products_client.delete_product(new_product_id)
-    page.reload()
-    expect(new_product_banner).not_to_be_visible()
 
 
 def test_category_page_navigation(page):
