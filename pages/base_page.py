@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import Page
 from typing import Self
 from config.utils import url_joiner, get_env
-from test_data.category_test_data import TestCategory, ACCESSORIES
+from test_data.product_test_data import TestCategory, ACCESSORIES
 
 if TYPE_CHECKING:
     from pages.login_page import LoginPage

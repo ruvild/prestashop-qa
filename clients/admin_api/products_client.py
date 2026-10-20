@@ -5,7 +5,7 @@ from schemas.product_schemas import (
     ProductPatchRequest,
 )
 from requests import Response
-from test_data.category_test_data import TestCategory
+from test_data.product_test_data import TestCategory
 
 
 class ProductsClient(BaseClient):

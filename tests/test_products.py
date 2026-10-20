@@ -2,8 +2,11 @@ from pages.base_page import BasePage
 from pages.home_page import HomePage
 from pages.category_page import CategoryPage
 from playwright.sync_api import expect
-from test_data.category_test_data import HOME_ACCESSORIES
+from test_data.product_test_data import HOME_ACCESSORIES
 from clients.binshops.category_products_client import CategoryProductsClient
+from clients.binshops.product_search_client import ProductSearchClient
+from test_data.product_test_data import ProductTestData
+import pytest
 
 
 def test_product_navigation(page):
@@ -61,3 +64,27 @@ def test_filters_api(products_client, subcategory=HOME_ACCESSORIES):
     id_set_bin = CategoryProductsClient().search_category_products(subcategory)
     id_set_prest = products_client.filter_products_by_category(subcategory)
     assert id_set_bin == id_set_prest
+
+
+@pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_ERROR)
+def test_product_search_error(query):
+    response = ProductSearchClient().search_products(query)
+    assert response["success"] is False
+
+
+@pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_NO_MATCHES)
+def test_product_search_no_matches(query):
+    response = ProductSearchClient().search_products(query)
+    assert not response["psdata"]["products"]
+
+
+@pytest.mark.xfail(
+    reason="Binshops productSearch crashes when a product has no image",
+    strict=True,
+)
+@pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_MATCH_FOUND)
+def test_product_search_match_found(query, default_product):
+    new_product_id = default_product.productId
+    response = ProductSearchClient().search_products(query)
+    product_ids = [product["id_product"] for product in response["psdata"]["products"]]
+    assert new_product_id in product_ids

@@ -1,5 +1,5 @@
 from clients.binshops.base_client import BaseClient
-from test_data.category_test_data import TestCategory
+from test_data.product_test_data import TestCategory
 from typing import Any
 
 
