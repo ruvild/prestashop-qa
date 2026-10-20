@@ -1,6 +1,7 @@
 from clients.binshops.base_client import BaseClient
 from test_data.product_test_data import TestCategory
 from typing import Any
+from config.utils import binshops_extractor
 
 
 class CategoryProductsClient(BaseClient):
@@ -12,7 +13,7 @@ class CategoryProductsClient(BaseClient):
         self,
         category: TestCategory,
         additional_params: dict[str, Any] | None = None,
-    ) -> set[int]:
+    ) -> set:
         url = self.build_url(self.endpoint)
         params = {"id_category": category.id}
         if additional_params:
@@ -20,5 +21,5 @@ class CategoryProductsClient(BaseClient):
         res = self.session.get(url, params=params)
         res.raise_for_status()
 
-        data: dict = res.json()
-        return {product["id_product"] for product in data["psdata"]["products"]}
+        data: dict[str, Any] = res.json()
+        return set(binshops_extractor("id_product", data))

@@ -4,6 +4,7 @@ from scripts.setup_api_client import ApiClientSetup
 from scripts.setup_environment import ensure_environment
 from clients.admin_api.customers_client import CustomersClient
 from clients.admin_api.products_client import ProductsClient
+from clients.binshops.product_search_client import ProductSearchClient
 import os
 
 
@@ -34,3 +35,8 @@ def customers_client(auth_key):
 @pytest.fixture()
 def products_client(auth_key):
     return ProductsClient(auth_key)
+
+
+@pytest.fixture()
+def product_search_client():
+    return ProductSearchClient()

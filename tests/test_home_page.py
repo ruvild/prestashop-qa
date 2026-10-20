@@ -20,6 +20,7 @@ def test_search_bar_ui(page):
         f"{current_page.base_url}rest/productSearch?s={search_keyword}"
     )
     expect(res).to_be_ok()
+    print(res.text)
     product_id_list_api = {
         product["id_product"] for product in res.json()["psdata"]["products"]
     }

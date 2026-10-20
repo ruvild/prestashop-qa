@@ -4,8 +4,8 @@ from pages.category_page import CategoryPage
 from playwright.sync_api import expect
 from test_data.product_test_data import HOME_ACCESSORIES
 from clients.binshops.category_products_client import CategoryProductsClient
-from clients.binshops.product_search_client import ProductSearchClient
 from test_data.product_test_data import ProductTestData
+from config.utils import binshops_extractor
 import pytest
 
 
@@ -67,14 +67,14 @@ def test_filters_api(products_client, subcategory=HOME_ACCESSORIES):
 
 
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_ERROR)
-def test_product_search_error(query):
-    response = ProductSearchClient().search_products(query)
+def test_product_search_error(query, product_search_client):
+    response = product_search_client.search_products(query=query)
     assert response["success"] is False
 
 
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_NO_MATCHES)
-def test_product_search_no_matches(query):
-    response = ProductSearchClient().search_products(query)
+def test_product_search_no_matches(query, product_search_client):
+    response = product_search_client.search_products(query=query)
     assert not response["psdata"]["products"]
 
 
@@ -83,8 +83,24 @@ def test_product_search_no_matches(query):
     strict=True,
 )
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_MATCH_FOUND)
-def test_product_search_match_found(query, default_product):
+def test_product_search_match_found(query, default_product, product_search_client):
     new_product_id = default_product.productId
-    response = ProductSearchClient().search_products(query)
-    product_ids = [product["id_product"] for product in response["psdata"]["products"]]
+    response = product_search_client.search_products(query=query)
+    product_ids = binshops_extractor("id_product", response)
     assert new_product_id in product_ids
+
+
+@pytest.mark.parametrize("field, sort_order", ProductTestData.PRODUCT_SORTING_METHODS)
+def test_product_sorting(field, sort_order, product_search_client):
+    response = product_search_client.search_products(sort_order=sort_order)
+    search_list = binshops_extractor(field, response)
+
+    if field == "price":
+        search_list = [float(item[1:]) for item in search_list]
+    elif field == "position":
+        search_list = [int(item) for item in search_list]
+
+    if sort_order["order"].endswith(".desc"):
+        assert search_list == sorted(search_list, reverse=True)
+    else:
+        assert search_list == sorted(search_list)

@@ -30,3 +30,11 @@ class ProductTestData:
         pytest.param("mug", id="normal"),
         pytest.param("MUG", id="uppercase"),
     ]
+
+    PRODUCT_SORTING_METHODS = [
+        pytest.param("position", {"order": "product.position.desc"}, id="relevance"),
+        pytest.param("name", {"order": "product.name.asc"}, id="name_asc"),
+        pytest.param("name", {"order": "product.name.desc"}, id="name_desc"),
+        pytest.param("price", {"order": "product.price.asc"}, id="price_asc"),
+        pytest.param("price", {"order": "product.price.desc"}, id="price_desc"),
+    ]
