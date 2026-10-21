@@ -3,7 +3,6 @@ from pages.home_page import HomePage
 from pages.category_page import CategoryPage
 from playwright.sync_api import expect
 from test_data.product_test_data import HOME_ACCESSORIES
-from clients.binshops.category_products_client import CategoryProductsClient
 from test_data.product_test_data import ProductTestData
 from config.utils import binshops_extractor
 import pytest
@@ -46,15 +45,21 @@ def test_category_page_navigation(page):
     expect(current_page.product_section).to_be_visible()
 
 
-def test_filters_ui(page, subcategory=HOME_ACCESSORIES):
+def test_filters_ui(page, category_products_client, subcategory=HOME_ACCESSORIES):
 
     BasePage(page).navigate().navigate_to_category_page(subcategory=subcategory)
 
-    filtered_products_ids_ui = CategoryPage(page).get_filtered_products_ids()
+    response = category_products_client.search_category_products(subcategory)
+    filtered_products_ids_api = set(binshops_extractor("id_product", response))
 
-    filtered_products_ids_api = CategoryProductsClient().search_category_products(
-        subcategory
+    category_page = CategoryPage(page)
+    expect(category_page.filtered_products).to_have_count(
+        len(filtered_products_ids_api)
     )
+
+    filtered_products_ids_ui = category_page.get_filtered_products_ids()
+
+    assert filtered_products_ids_ui == filtered_products_ids_api
 
     assert filtered_products_ids_ui == filtered_products_ids_api
 
