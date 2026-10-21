@@ -5,6 +5,9 @@ import time
 import os
 
 BASE_URL = get_env("BASE_URL")
+BINSHOPS_REPO = "https://github.com/binshops/prestashop-rest.git"
+BINSHOPS_COMMIT = "c9007fbff64daed488a51267ff66fb9bf903c41f"
+BINSHOPS_PATH = "binshopsrest"
 
 SQL_DISABLE_ADMIN_SECURITY = """
 UPDATE ps_configuration
@@ -13,7 +16,10 @@ WHERE name='PS_ADMIN_API_FORCE_DEBUG_SECURED'
 """
 
 
-def ensure_environment():
+def ensure_environment() -> None:
+    _ensure_playwright_browsers()
+    _ensure_binshops_module()
+
     if _is_environment_up():
         print("Environment already running. Skipping container setup...")
         return
@@ -25,6 +31,39 @@ def ensure_environment():
 
     _wait_until_ready()
     _disable_admin_security()
+
+def _ensure_playwright_browsers() -> None:
+    print("Checking Playwright browsers...")
+
+    result = subprocess.run(
+        ["playwright", "install"],
+        check=True,
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError("Failed to install Playwright browsers.")
+
+    print("Playwright browsers are ready.")
+
+def _ensure_binshops_module() -> None:
+    if os.path.isdir(BINSHOPS_PATH):
+        print("Binshops REST module already exists. Skipping clone...")
+        return
+
+    print("Cloning Binshops REST module...")
+    subprocess.run(
+        [
+            "git",
+            "clone",
+            "--revision",
+            BINSHOPS_COMMIT,
+            BINSHOPS_REPO,
+            BINSHOPS_PATH,
+        ],
+        check=True,
+    )
+
+    print("Binshops REST module cloned.")
 
 
 def _is_environment_up() -> bool:
@@ -49,7 +88,7 @@ def _wait_until_ready() -> None:
         if time.time() - start > 300:
             raise TimeoutError("PrestaShop failed to start within 5 minutes.")
 
-        time.sleep(5)
+        time.sleep(10)
 
 
 def _disable_admin_security() -> None:
