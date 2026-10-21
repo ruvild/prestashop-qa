@@ -38,3 +38,16 @@ class ProductTestData:
         pytest.param("price", {"order": "product.price.asc"}, id="price_asc"),
         pytest.param("price", {"order": "product.price.desc"}, id="price_desc"),
     ]
+
+    PRODUCT_PRICE_RANGES_EXIST = [
+        pytest.param(10, 40, id="all_products"),
+        pytest.param(11.9, 18.9, id="some_products"),
+        pytest.param(30, 35.5, id="most_expensive_product"),
+        pytest.param(18.9, 18.9, id="single_price"),
+    ]
+
+    PRODUCT_PRICE_RANGES_NOT_EXIST = [
+        pytest.param(12, 13, id="no_products_in_between"),
+        pytest.param(36, 40, id="no_products_above"),
+        pytest.param(10, 11.89, id="no_products_below"),
+    ]

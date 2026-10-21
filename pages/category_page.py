@@ -15,4 +15,5 @@ class CategoryPage(BasePage):
             product.get_attribute("data-id-product")
             for product in self.filtered_products.all()
         ]
+        print(filtered_products_ids_ui)
         return set(extract_product_ids(filtered_products_ids_ui))

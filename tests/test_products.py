@@ -59,11 +59,53 @@ def test_filters_ui(page, subcategory=HOME_ACCESSORIES):
     assert filtered_products_ids_ui == filtered_products_ids_api
 
 
-def test_filters_api(products_client, subcategory=HOME_ACCESSORIES):
+def test_category_filters_api(
+    products_client, category_products_client, subcategory=HOME_ACCESSORIES
+):
 
-    id_set_bin = CategoryProductsClient().search_category_products(subcategory)
+    response = category_products_client.search_category_products(subcategory)
+    id_set_bin = set(binshops_extractor("id_product", response))
     id_set_prest = products_client.filter_products_by_category(subcategory)
     assert id_set_bin == id_set_prest
+
+
+@pytest.mark.parametrize(
+    "lowest_price,highest_price", ProductTestData.PRODUCT_PRICE_RANGES_EXIST
+)
+def test_price_filters_match_api(
+    lowest_price, highest_price, category_products_client, subcategory=HOME_ACCESSORIES
+):
+
+    filters = {"q": f"Price-€-{lowest_price}-{highest_price}"}
+
+    response = category_products_client.search_category_products(
+        subcategory, additional_filters=filters
+    )
+    price_list_raw = binshops_extractor("price", response)
+    search_list = [float(item[1:]) for item in price_list_raw]
+
+    assert search_list
+    assert all(
+        lowest_price <= product_price <= highest_price for product_price in search_list
+    )
+
+
+@pytest.mark.parametrize(
+    "lowest_price,highest_price", ProductTestData.PRODUCT_PRICE_RANGES_NOT_EXIST
+)
+def test_price_filters_no_match_api(
+    lowest_price, highest_price, category_products_client, subcategory=HOME_ACCESSORIES
+):
+
+    filters = {"q": f"Price-€-{lowest_price}-{highest_price}"}
+
+    response = category_products_client.search_category_products(
+        subcategory, additional_filters=filters
+    )
+    price_list_raw = binshops_extractor("price", response)
+    search_list = [float(item[1:]) for item in price_list_raw]
+
+    assert not search_list
 
 
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_ERROR)
