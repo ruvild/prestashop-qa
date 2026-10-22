@@ -150,7 +150,7 @@ def test_product_sorting(field, sort_order, product_search_client):
     elif field == "position":
         search_list = [int(item) for item in search_list]
 
-    if sort_order["order"].endswith(".desc"):
+    if sort_order.endswith(".desc"):
         assert search_list == sorted(search_list, reverse=True)
     else:
         assert search_list == sorted(search_list)
@@ -181,3 +181,20 @@ def test_product_color_selection(page, products_client):
         product_api_data["name"].lower()
         == f"size - {size_value}, color - {color_value}"
     )
+
+
+def test_pagination_api(product_search_client):
+    results_per_page = 2
+
+    res_page_1 = product_search_client.search_products(
+        results_per_page=results_per_page, page=1
+    )
+    page_1_ids = set(binshops_extractor("id_product", res_page_1))
+
+    res_page_2 = product_search_client.search_products(
+        results_per_page=results_per_page, page=2
+    )
+    page_2_ids = set(binshops_extractor("id_product", res_page_2))
+
+    assert 0 < len(page_2_ids) <= len(page_1_ids) == results_per_page
+    assert page_1_ids.isdisjoint(page_2_ids)

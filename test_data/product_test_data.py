@@ -32,11 +32,11 @@ class ProductTestData:
     ]
 
     PRODUCT_SORTING_METHODS = [
-        pytest.param("position", {"order": "product.position.desc"}, id="relevance"),
-        pytest.param("name", {"order": "product.name.asc"}, id="name_asc"),
-        pytest.param("name", {"order": "product.name.desc"}, id="name_desc"),
-        pytest.param("price", {"order": "product.price.asc"}, id="price_asc"),
-        pytest.param("price", {"order": "product.price.desc"}, id="price_desc"),
+        pytest.param("position", "product.position.desc", id="relevance"),
+        pytest.param("name", "product.name.asc", id="name_asc"),
+        pytest.param("name", "product.name.desc", id="name_desc"),
+        pytest.param("price", "product.price.asc", id="price_asc"),
+        pytest.param("price", "product.price.desc", id="price_desc"),
     ]
 
     PRODUCT_PRICE_RANGES_EXIST = [
