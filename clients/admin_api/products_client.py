@@ -55,3 +55,10 @@ class ProductsClient(BaseClient):
             for product in data["items"]
             if product["category"] == category.name
         }
+
+    def search_product_combination(self, combination_id: str) -> dict:
+        url = self.build_url(f"{self.endpoint}/combinations/{combination_id}")
+        res = self.session.get(url, headers=self.auth_header)
+        res.raise_for_status()
+
+        return res.json()

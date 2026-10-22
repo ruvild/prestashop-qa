@@ -1,11 +1,14 @@
 from pages.base_page import BasePage
 from pages.home_page import HomePage
 from pages.category_page import CategoryPage
+from pages.product_page import ProductPage
 from playwright.sync_api import expect
 from test_data.product_test_data import HOME_ACCESSORIES
 from test_data.product_test_data import ProductTestData
 from config.utils import binshops_extractor
 import pytest
+from config.utils import product_url_parser
+import re
 
 
 def test_product_navigation(page):
@@ -151,3 +154,30 @@ def test_product_sorting(field, sort_order, product_search_client):
         assert search_list == sorted(search_list, reverse=True)
     else:
         assert search_list == sorted(search_list)
+
+
+def test_product_color_selection(page, products_client):
+    product_page = ProductPage(page)
+    page.goto(f"{product_page.base_url}1-1-hummingbird-printed-t-shirt.html")
+
+    product_page.black_color_option.click()
+    expect(page).to_have_url(re.compile(r"color-black"))
+    expect(product_page.inner_black_color_button).to_be_checked()
+
+    product_url_data = product_url_parser(page.url)
+
+    size_id: str = product_url_data["attributes"]["size"]["attribute_id"]
+    size_value: str = product_url_data["attributes"]["size"]["value"]
+    color_value: str = product_url_data["attributes"]["color"]["value"]
+
+    expect(product_page.size_dropdown).to_have_value(size_id)
+
+    combination_id: str = product_url_data["combination_id"]
+    product_api_data = products_client.search_product_combination(combination_id)
+
+    assert product_url_data["product_id"] == product_api_data["productId"]
+    assert product_api_data["combinationId"] == combination_id
+    assert (
+        product_api_data["name"].lower()
+        == f"size - {size_value}, color - {color_value}"
+    )
