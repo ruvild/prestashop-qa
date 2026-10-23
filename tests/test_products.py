@@ -11,7 +11,7 @@ from config.utils import product_url_parser
 import re
 
 
-def test_product_navigation(page):
+def test_product_navigation(page, products_client):
 
     current_page = HomePage(page).navigate()
     product = current_page.get_featured_product()
@@ -19,6 +19,12 @@ def test_product_navigation(page):
     product_page = current_page.navigate_to_product_page(product)
 
     expect(product_page.product_title).to_have_text(product_name)
+
+    product_url_data = product_url_parser(page.url)
+    product_id: int = product_url_data["product_id"]
+    product_data = products_client.get_product(product_id)
+
+    assert product_name == product_data["names"]["en-US"]
 
 
 def test_product_quick_view(page):

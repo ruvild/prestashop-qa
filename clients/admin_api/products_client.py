@@ -13,7 +13,13 @@ class ProductsClient(BaseClient):
         super().__init__(auth_token)
         self.endpoint = "products"
 
-    def create_product(self, product: ProductCreateRequest):
+    def get_product(self, product_id: int) -> dict:
+        url = self.build_url(f"{self.endpoint}/{product_id}")
+        res = self.session.get(url, headers=self.auth_header)
+        res.raise_for_status()
+        return res.json()
+
+    def create_product(self, product: ProductCreateRequest) -> ProductResponse:
         url = self.build_url(self.endpoint)
         payload = product.model_dump(exclude_none=True)
         res = self.session.post(url, headers=self.auth_header, json=payload)
@@ -33,7 +39,7 @@ class ProductsClient(BaseClient):
         print(f"Product with id <{product_id}> deleted")
         return res
 
-    def update_product(self, product_id: int, patch_data: dict):
+    def update_product(self, product_id: int, patch_data: dict) -> ProductResponse:
         url = self.build_url(f"{self.endpoint}/{product_id}")
         validated_patch_data = ProductPatchRequest.model_validate(patch_data)
         payload: dict = validated_patch_data.model_dump(exclude_none=True)
