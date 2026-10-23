@@ -20,11 +20,6 @@ def ensure_environment() -> None:
     _ensure_playwright_browsers()
     _ensure_binshops_module()
 
-
-def ensure_environment() -> None:
-    _ensure_playwright_browsers()
-    _ensure_binshops_module()
-
     if _is_environment_up():
         print("Environment already running. Skipping container setup...")
         return
