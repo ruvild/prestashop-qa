@@ -25,8 +25,8 @@
 - 🟩 **Процесс создания учетной записи** — *Готово*
 - 🟩 **Аутентификация / Вход в систему** — *Готово*
 - 🟩 **Навигация по главной странице** — *Готово*
-- 🚧 **Просмотр товаров и поиск** — *В разработке*
-- 🚧 **Полный процесс оформления заказа (Checkout)** — *Запланировано*
+- 🟩 **Просмотр товаров и поиск** — *Готово*
+- 🚧 **Полный процесс оформления заказа (Checkout)** — *В разработке*
 
 ---
 
@@ -55,7 +55,9 @@ prestashop-qa/
 ├── factories/                  # Генераторы тестовых данных
 ├── pages/                      # Реализация паттерна Page Object Model (POM)
 ├── schemas/                    # Pydantic-модели для API-запросов, ответов и данных UI
+├── schemas/                    # Pydantic-модели для API-запросов, ответов и данных UI
 ├── scripts/                    # Скрипты подготовки окружения и инициализации API-клиентов
+├── test_data/                  # Тестовые данные и предопределённые значения для ввода
 ├── test_data/                  # Тестовые данные и предопределённые значения для ввода
 ├── tests/                      # Модули UI- и API-тестов, тестовые данные и фикстуры
 ├── .gitignore                  # Правила отслеживания файлов в Git
@@ -69,7 +71,9 @@ prestashop-qa/
 ## Требования
 
 - Python **3.14+**
+- Python **3.14+**
 - Docker Engine **29.0+**
+- Docker Compose **5.0+**
 - Docker Compose **5.0+**
 
 ## 1. Установка
@@ -84,7 +88,30 @@ pip install -r requirements.txt
 ```
 
 ## 2. Настройка переменных окружения
+## 2. Настройка переменных окружения
 
+Создайте файл `.env` в корневой директории проекта со следующими переменными окружения:
+
+```dotenv
+BASE_URL=http://localhost:8080
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_ROOT_PASSWORD=your_database_root_password
+```
+
+Эти переменные используются при автоматической настройке окружения.
+
+## 3. Настройка окружения
+
+В проекте предусмотрен автоматизированный скрипт настройки окружения, который:
+
+* Устанавливает браузеры Playwright, необходимые для UI-тестов.
+* Клонирует зафиксированную версию модуля Binshops REST, необходимого для тестового окружения.
+* Запускает Docker-контейнеры.
+* Ожидает завершения инициализации PrestaShop.
+* Автоматически отключает принудительное использование HTTPS/TLS для Admin API в режиме отладки.
+
+Для подготовки окружения локально создайте небольшой вспомогательный скрипт:
 Создайте файл `.env` в корневой директории проекта со следующими переменными окружения:
 
 ```dotenv
@@ -121,6 +148,7 @@ if __name__ == "__main__":
 python local_env_setup.py
 ```
 
+> **Примечание:** В CI-окружении `conftest.py` автоматически определяет `CI=true` и запускает `ensure_environment()` во время `pytest_configure()`, поэтому ручная настройка не требуется.
 > **Примечание:** В CI-окружении `conftest.py` автоматически определяет `CI=true` и запускает `ensure_environment()` во время `pytest_configure()`, поэтому ручная настройка не требуется.
 
 ---
@@ -174,4 +202,5 @@ reports/report.html
 * 🐛 [#42133](https://github.com/PrestaShop/PrestaShop/issues/42133) — В описании именных полей на странице регистрации дефис не указан как допустимый символ
 * 🐛 [#55](https://github.com/binshops/prestashop-rest/issues/55) — Сбой эндпоинта входа в PrestaShop 9.2.0
 
+> 🔗 **Посмотреть все отправленные отчеты:** [Трекер задач PrestaShop](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild), [Трекер задач Binshops](https://github.com/binshops/prestashop-rest/issues?q=is%3Aissue+author%3Aruvild)
 > 🔗 **Посмотреть все отправленные отчеты:** [Трекер задач PrestaShop](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild), [Трекер задач Binshops](https://github.com/binshops/prestashop-rest/issues?q=is%3Aissue+author%3Aruvild)

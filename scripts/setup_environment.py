@@ -6,7 +6,7 @@ import os
 
 BASE_URL = get_env("BASE_URL")
 BINSHOPS_REPO = "https://github.com/binshops/prestashop-rest.git"
-BINSHOPS_COMMIT = "c9007fbff64daed488a51267ff66fb9bf903c41f"
+BINSHOPS_COMMIT = "eaeec19ca95f6b5d94c03cbf277133502b4248c3"
 BINSHOPS_PATH = "binshopsrest"
 
 SQL_DISABLE_ADMIN_SECURITY = """
@@ -32,6 +32,7 @@ def ensure_environment() -> None:
     _wait_until_ready()
     _disable_admin_security()
 
+
 def _ensure_playwright_browsers() -> None:
     print("Checking Playwright browsers...")
 
@@ -44,6 +45,7 @@ def _ensure_playwright_browsers() -> None:
         raise RuntimeError("Failed to install Playwright browsers.")
 
     print("Playwright browsers are ready.")
+
 
 def _ensure_binshops_module() -> None:
     if os.path.isdir(BINSHOPS_PATH):
@@ -88,6 +90,7 @@ def _wait_until_ready() -> None:
         if time.time() - start > 300:
             raise TimeoutError("PrestaShop failed to start within 5 minutes.")
 
+        time.sleep(10)
         time.sleep(10)
 
 

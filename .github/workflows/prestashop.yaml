@@ -1,10 +1,9 @@
 name: PrestaShop Test Suite
 
 on:
-  push:
-    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   prestashop-tester:
@@ -48,13 +47,13 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: 'binshops/prestashop-rest'
-          ref: 'c9007fbff64daed488a51267ff66fb9bf903c41f'
+          ref: 'eaeec19ca95f6b5d94c03cbf277133502b4248c3'
           path: 'binshopsrest'
 
       - name: Run Pytest Suite
         run: |          
           export DB_ROOT_PASSWORD=$(openssl rand -hex 16)
-          pytest -n auto --browser chromium --browser firefox --browser webkit --reruns 2 --reruns-delay 1 --screenshot=only-on-failure --output=screenshots       
+          pytest -n auto --browser chromium --browser firefox --browser webkit --screenshot=only-on-failure --output=screenshots       
         env:
           CI: "true"
           BASE_URL: "http://localhost:8080/"

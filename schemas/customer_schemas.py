@@ -2,6 +2,15 @@ from pydantic import BaseModel, EmailStr
 from typing import List, Literal
 
 
+class CustomerRegistrationUI(BaseModel):
+
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+    birthdate: str = ""
+
+
 class CustomerSearchResponse(BaseModel):
     idCustomer: int
     firstname: str

@@ -2,9 +2,11 @@ from typing import TYPE_CHECKING
 from playwright.sync_api import Page
 from typing import Self
 from config.utils import url_joiner, get_env
+from test_data.product_test_data import TestCategory, ACCESSORIES
 
 if TYPE_CHECKING:
     from pages.login_page import LoginPage
+    from pages.category_page import CategoryPage
 
 
 class BasePage:
@@ -71,3 +73,23 @@ class BasePage:
 
         self.sign_in_footer.click()
         return LoginPage(self.page)
+
+    def navigate_to_category_page(
+        self,
+        category: TestCategory = ACCESSORIES,
+        subcategory: TestCategory | None = None,
+    ) -> CategoryPage:
+        from pages.category_page import CategoryPage
+
+        top_menu = self.top_menu.get_by_role(
+            "link", name=f"{category.name}", exact=True
+        )
+
+        if subcategory:
+            top_menu.hover()
+            self.top_menu.get_by_role(
+                "link", name=f"{subcategory.name}", exact=True
+            ).click()
+        else:
+            top_menu.click()
+        return CategoryPage(self.page)

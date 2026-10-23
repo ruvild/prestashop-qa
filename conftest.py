@@ -2,7 +2,10 @@ import pytest
 from collections.abc import Generator
 from scripts.setup_api_client import ApiClientSetup
 from scripts.setup_environment import ensure_environment
-from clients.customers_client import CustomersClient
+from clients.admin_api.customers_client import CustomersClient
+from clients.admin_api.products_client import ProductsClient
+from clients.binshops.product_search_client import ProductSearchClient
+from clients.binshops.category_products_client import CategoryProductsClient
 import os
 
 
@@ -28,3 +31,18 @@ def auth_key(worker_id: str) -> Generator[str, None, None]:
 @pytest.fixture()
 def customers_client(auth_key):
     return CustomersClient(auth_key)
+
+
+@pytest.fixture()
+def products_client(auth_key):
+    return ProductsClient(auth_key)
+
+
+@pytest.fixture()
+def product_search_client():
+    return ProductSearchClient()
+
+
+@pytest.fixture()
+def category_products_client():
+    return CategoryProductsClient()

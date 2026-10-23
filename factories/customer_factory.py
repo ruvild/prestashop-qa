@@ -1,6 +1,5 @@
 from faker import Faker
-from models.customer import CustomerRegistrationUI
-from schemas.customer_schemas import CustomerCreateRequest
+from schemas.customer_schemas import CustomerRegistrationUI, CustomerCreateRequest
 import random
 
 fake = Faker()

@@ -9,5 +9,5 @@ class BaseClient:
         self.session = requests.Session()
         self.auth_header = {"Authorization": f"Bearer {auth_token}"}
 
-    def build_url(self, endpoint) -> str:
+    def build_url(self, endpoint: str) -> str:
         return url_joiner(self.base_url, endpoint)
