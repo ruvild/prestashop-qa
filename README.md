@@ -25,8 +25,8 @@ A containerized testing framework for **PrestaShop** (with the additional **Bins
 - 🟩 **Account Creation Flow** — *Completed*
 - 🟩 **Authentication / Login** — *Completed*
 - 🟩 **Home Page Navigation** — *Completed*
-- 🟩 **Product Browsing & Search** — *Completed*
-- 🚧 **Full Checkout Flow** — *In Progress*
+- 🚧 **Product Browsing & Search** — *In Progress*
+- 🚧 **Full Checkout Flow** — *Planned*
 
 ---
 
@@ -55,9 +55,7 @@ prestashop-qa/
 ├── factories/                  # Test data generators
 ├── pages/                      # Page Object Model (POM) representations
 ├── schemas/                    # Pydantic models for API requests, responses, and UI data
-├── schemas/                    # Pydantic models for API requests, responses, and UI data
 ├── scripts/                    # Environment provisioning & API client initialization scripts
-├── test_data/                  # Test data and predefined input values
 ├── test_data/                  # Test data and predefined input values
 ├── tests/                      # UI & API test modules, test data, and scoped fixtures
 ├── .gitignore                  # Git tracking rules
@@ -71,9 +69,7 @@ prestashop-qa/
 ## Requirements
 
 - Python **3.14**
-- Python **3.14**
 - Docker Engine **29.0+**
-- Docker Compose **5.0+**
 - Docker Compose **5.0+**
 
 ## 1. Installation
@@ -101,28 +97,9 @@ DB_ROOT_PASSWORD=your_database_root_password
 These variables are used by the environment provisioning.
 
 ## 3. Environment Provisioning
-## 2. Configure Environment Variables
-
-Create a `.env` file in the project root with the required environment variables:
-
-```dotenv
-BASE_URL=http://localhost:8080
-DB_NAME=your_database_name
-DB_USER=your_database_user
-DB_ROOT_PASSWORD=your_database_root_password
-```
-
-These variables are used by the environment provisioning.
-
-## 3. Environment Provisioning
 
 The framework includes an automated setup script that:
 
-* Installs the Playwright browser binaries required for UI tests.
-* Clones the pinned version of the Binshops REST API module required by the test environment.
-* Starts the Docker containers.
-* Waits for PrestaShop to initialize.
-* Automatically disables HTTPS/TLS enforcement on the Admin API for debug-mode testing.
 * Installs the Playwright browser binaries required for UI tests.
 * Clones the pinned version of the Binshops REST API module required by the test environment.
 * Starts the Docker containers.
@@ -197,5 +174,4 @@ During development, several defects were identified and reported to the official
 * 🐛 [#42133](https://github.com/PrestaShop/PrestaShop/issues/42133) — Registration Page name fields descriptions are missing hyphen as an allowed character
 * 🐛 [#55](https://github.com/binshops/prestashop-rest/issues/55) — Login endpoint crashes in PrestaShop 9.2.0
 
-> 🔗 **View All Submitted Reports:** [PrestaShop Issue Tracker](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild), [Binshops Issue Tracker](https://github.com/binshops/prestashop-rest/issues?q=is%3Aissue+author%3Aruvild)
 > 🔗 **View All Submitted Reports:** [PrestaShop Issue Tracker](https://github.com/PrestaShop/PrestaShop/issues?q=is%3Aissue+author%3Aruvild), [Binshops Issue Tracker](https://github.com/binshops/prestashop-rest/issues?q=is%3Aissue+author%3Aruvild)
