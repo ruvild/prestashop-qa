@@ -23,6 +23,7 @@ def ensure_environment() -> None:
     if _is_environment_up():
         print("Environment already running. Skipping container setup...")
         return
+
     print("Starting Docker...")
     subprocess.run(
         ["docker", "compose", "up", "-d"],
@@ -36,13 +37,10 @@ def ensure_environment() -> None:
 def _ensure_playwright_browsers() -> None:
     print("Checking Playwright browsers...")
 
-    result = subprocess.run(
+    subprocess.run(
         ["playwright", "install"],
         check=True,
     )
-
-    if result.returncode != 0:
-        raise RuntimeError("Failed to install Playwright browsers.")
 
     print("Playwright browsers are ready.")
 
@@ -90,7 +88,6 @@ def _wait_until_ready() -> None:
         if time.time() - start > 300:
             raise TimeoutError("PrestaShop failed to start within 5 minutes.")
 
-        time.sleep(10)
         time.sleep(10)
 
 
