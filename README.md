@@ -88,7 +88,7 @@ pip install -r requirements.txt
 Create a `.env` file in the project root with the required environment variables:
 
 ```dotenv
-BASE_URL=http://localhost:8080
+BASE_URL=http://localhost:8080/
 DB_NAME=your_database_name
 DB_USER=your_database_user
 DB_ROOT_PASSWORD=your_database_root_password
