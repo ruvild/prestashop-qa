@@ -20,6 +20,11 @@ def ensure_environment() -> None:
     _ensure_playwright_browsers()
     _ensure_binshops_module()
 
+
+def ensure_environment() -> None:
+    _ensure_playwright_browsers()
+    _ensure_binshops_module()
+
     if _is_environment_up():
         print("Environment already running. Skipping container setup...")
         return
@@ -90,6 +95,7 @@ def _wait_until_ready() -> None:
         if time.time() - start > 300:
             raise TimeoutError("PrestaShop failed to start within 5 minutes.")
 
+        time.sleep(10)
         time.sleep(10)
 
 
