@@ -1,6 +1,7 @@
 from pages.base_page import BasePage
 from playwright.sync_api import Locator
 from pages.product_page import ProductPage
+from pages.cart_page import CartPage
 
 
 class HomePage(BasePage):
@@ -14,13 +15,19 @@ class HomePage(BasePage):
         self.featured_product = self.featured_products_block.locator(
             "[data-id-product='1']"
         )
-
         self.quick_view_button = self.featured_product.get_by_role(
             "button", name="Quick view"
         )
         self.quick_view_dialog = page.locator(".quickview__dialog")
         self.quick_view_product_title = self.quick_view_dialog.locator(".product__name")
         self.all_product_details = self.quick_view_dialog.get_by_text("All details")
+
+        self.added_to_cart_popup = page.locator("#blockcart-modal").locator(
+            ".modal-content"
+        )
+        self.proceed_to_checkout_button = self.added_to_cart_popup.get_by_text(
+            "Proceed to checkout"
+        )
 
     def get_featured_product(self) -> Locator:
         return self.featured_product
@@ -40,3 +47,11 @@ class HomePage(BasePage):
     def navigate_to_product_page_via_quick_view(self) -> ProductPage:
         self.all_product_details.click()
         return ProductPage(self.page)
+
+    def add_product_to_cart(self, product: Locator) -> Locator:
+        product.locator('[data-button-action="add-to-cart"]').click()
+        return self.added_to_cart_popup
+
+    def proceed_to_checkout(self) -> CartPage:
+        self.proceed_to_checkout_button.click()
+        return CartPage(self.page)
