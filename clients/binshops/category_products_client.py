@@ -1,7 +1,6 @@
 from clients.binshops.base_client import BaseClient
 from test_data.product_test_data import TestCategory
 from typing import Any
-from config.utils import binshops_extractor
 
 
 class CategoryProductsClient(BaseClient):

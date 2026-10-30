@@ -1,7 +1,7 @@
 from pages.home_page import HomePage
 from playwright.sync_api import expect
 from config.utils import extract_product_ids
-from config.utils import binshops_extractor
+from config.utils import binshops_product_extractor
 
 
 def test_category_top_menu_ui(page):
@@ -20,7 +20,7 @@ def test_search_bar_ui(page, product_search_client):
     ]
     res = product_search_client.search_products(query=search_keyword)
 
-    product_id_list_api = binshops_extractor("id_product", res)
+    product_id_list_api = binshops_product_extractor("id_product", res)
 
     assert set(extract_product_ids(product_id_list_ui)) <= set(product_id_list_api)
 

@@ -2,7 +2,7 @@ from urllib.parse import urljoin
 from dotenv import load_dotenv
 import os
 import re
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 from typing import Any
 
 load_dotenv()
@@ -23,7 +23,7 @@ def extract_product_ids(id_list: list) -> list:
     return [int(re.sub(r"\D", "", product_id)) for product_id in id_list]
 
 
-def binshops_extractor(field: str, search_response: dict[str, Any]) -> list:
+def binshops_product_extractor(field: str, search_response: dict[str, Any]) -> list:
     return [product[field] for product in search_response["psdata"]["products"]]
 
 
@@ -58,3 +58,8 @@ def product_url_parser(url: str) -> dict:
         ),
         "attributes": attributes,
     }
+
+
+def get_order_id_from_url(url: str) -> int:
+    query_params = parse_qs(urlparse(url).query)
+    return int(query_params["id_order"][0])

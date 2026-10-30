@@ -13,8 +13,8 @@ class HomePage(BasePage):
         self.special_deals_block = page.locator(".ps-specials")
         self.latest_arrivals_block = page.locator(".ps-newproducts")
         self.featured_product = self.featured_products_block.locator(
-            "[data-id-product='1']"
-        )
+            ".product-miniature"
+        ).first
         self.quick_view_button = self.featured_product.get_by_role(
             "button", name="Quick view"
         )

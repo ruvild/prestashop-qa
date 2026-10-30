@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import List, Literal
+from typing import Literal
 
 
 class CustomerRegistrationUI(BaseModel):
@@ -29,7 +29,7 @@ class CustomerCreateRequest(BaseModel):
     email: EmailStr
     password: str
     defaultGroupId: int
-    groupIds: List[int]
+    groupIds: list[int]
     genderId: int | None = None
     newsletterSubscribed: bool = False
     partnerOffersSubscribed: bool = False
@@ -49,7 +49,7 @@ class CustomerCreateResponse(BaseModel):
     lastName: str
     email: EmailStr
     defaultGroupId: int
-    groupIds: List[int]
+    groupIds: list[int]
     genderId: Literal[0, 1, 2]
     enabled: bool
     newsletterSubscribed: bool

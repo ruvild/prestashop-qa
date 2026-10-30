@@ -5,7 +5,7 @@ from pages.product_page import ProductPage
 from playwright.sync_api import expect
 from test_data.product_test_data import HOME_ACCESSORIES
 from test_data.product_test_data import ProductTestData
-from config.utils import binshops_extractor
+from config.utils import binshops_product_extractor
 import pytest
 from config.utils import product_url_parser
 import re
@@ -59,7 +59,7 @@ def test_filters_ui(page, category_products_client, subcategory=HOME_ACCESSORIES
     BasePage(page).navigate().navigate_to_category_page(subcategory=subcategory)
 
     response = category_products_client.search_category_products(subcategory)
-    filtered_products_ids_api = set(binshops_extractor("id_product", response))
+    filtered_products_ids_api = set(binshops_product_extractor("id_product", response))
 
     category_page = CategoryPage(page)
     expect(category_page.filtered_products).to_have_count(
@@ -78,7 +78,7 @@ def test_category_filters_api(
 ):
 
     response = category_products_client.search_category_products(subcategory)
-    id_set_bin = set(binshops_extractor("id_product", response))
+    id_set_bin = set(binshops_product_extractor("id_product", response))
     id_set_prest = products_client.filter_products_by_category(subcategory)
     assert id_set_bin == id_set_prest
 
@@ -95,7 +95,7 @@ def test_price_filters_match_api(
     response = category_products_client.search_category_products(
         subcategory, additional_filters=filters
     )
-    price_list_raw = binshops_extractor("price", response)
+    price_list_raw = binshops_product_extractor("price", response)
     search_list = [float(item[1:]) for item in price_list_raw]
 
     assert search_list
@@ -116,7 +116,7 @@ def test_price_filters_no_match_api(
     response = category_products_client.search_category_products(
         subcategory, additional_filters=filters
     )
-    price_list_raw = binshops_extractor("price", response)
+    price_list_raw = binshops_product_extractor("price", response)
     search_list = [float(item[1:]) for item in price_list_raw]
 
     assert not search_list
@@ -142,14 +142,14 @@ def test_product_search_no_matches(query, product_search_client):
 def test_product_search_match_found(query, default_product, product_search_client):
     new_product_id = default_product.productId
     response = product_search_client.search_products(query=query)
-    product_ids = binshops_extractor("id_product", response)
+    product_ids = binshops_product_extractor("id_product", response)
     assert new_product_id in product_ids
 
 
 @pytest.mark.parametrize("field, sort_order", ProductTestData.PRODUCT_SORTING_METHODS)
 def test_product_sorting(field, sort_order, product_search_client):
     response = product_search_client.search_products(sort_order=sort_order)
-    search_list = binshops_extractor(field, response)
+    search_list = binshops_product_extractor(field, response)
 
     if field == "price":
         search_list = [float(item[1:]) for item in search_list]
@@ -195,12 +195,12 @@ def test_pagination_api(product_search_client):
     res_page_1 = product_search_client.search_products(
         results_per_page=results_per_page, page=1
     )
-    page_1_ids = set(binshops_extractor("id_product", res_page_1))
+    page_1_ids = set(binshops_product_extractor("id_product", res_page_1))
 
     res_page_2 = product_search_client.search_products(
         results_per_page=results_per_page, page=2
     )
-    page_2_ids = set(binshops_extractor("id_product", res_page_2))
+    page_2_ids = set(binshops_product_extractor("id_product", res_page_2))
 
     assert 0 < len(page_2_ids) <= len(page_1_ids) == results_per_page
     assert page_1_ids.isdisjoint(page_2_ids)
