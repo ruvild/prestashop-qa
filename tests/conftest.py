@@ -41,9 +41,8 @@ def _delete_customer(customers_client, customer_id: int) -> None:
 
 @pytest.fixture
 def default_product(products_client) -> Generator[ProductResponse, None, None]:
-    client = products_client
     product = ProductFactory().create_base_product()
-    response = client.create_product(product)
+    response = products_client.create_product(product)
     product_id = response.productId
 
     try:
@@ -57,13 +56,13 @@ def default_product(products_client) -> Generator[ProductResponse, None, None]:
             "reference": "test_mug",
         }
 
-        patch_response = client.update_product(product_id, baseline_patch_data)
+        patch_response = products_client.update_product(product_id, baseline_patch_data)
 
         yield patch_response
 
     finally:
         try:
-            client.delete_product(product_id)
+            products_client.delete_product(product_id)
         except Exception as e:
             print(f"\n[Teardown Warning] Failed to delete product {product_id}: {e}")
 
