@@ -3,6 +3,8 @@ from playwright.sync_api import Locator
 from pages.product_page import ProductPage
 from pages.cart_page import CartPage
 
+ADD_TO_CART_BUTTON = '[data-button-action="add-to-cart"]'
+
 
 class HomePage(BasePage):
     def __init__(self, page) -> None:
@@ -49,8 +51,11 @@ class HomePage(BasePage):
         return ProductPage(self.page)
 
     def add_product_to_cart(self, product: Locator) -> Locator:
-        product.locator('[data-button-action="add-to-cart"]').click()
+        product.locator(ADD_TO_CART_BUTTON).click()
         return self.added_to_cart_popup
+
+    def get_add_to_cart_button(self, product_card: Locator) -> Locator:
+        return product_card.locator(ADD_TO_CART_BUTTON)
 
     def proceed_to_checkout(self) -> CartPage:
         self.proceed_to_checkout_button.click()

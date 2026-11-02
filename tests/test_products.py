@@ -42,10 +42,24 @@ def test_product_quick_view(page):
 
 def test_new_product(page, default_product):
 
-    new_product_id = default_product.productId
     current_page = HomePage(page).navigate()
-    new_product_banner = current_page.get_product_from_new_arrivals(new_product_id)
+    new_product_banner = current_page.get_product_from_new_arrivals(
+        default_product.productId
+    )
     expect(new_product_banner).to_be_visible()
+
+
+def test_out_of_stock_product_ui(page, default_product):
+    home_page = HomePage(page).navigate()
+    product_card = home_page.get_product_from_new_arrivals(default_product.productId)
+
+    expect(product_card).to_be_visible()
+    expect(home_page.get_add_to_cart_button(product_card)).to_have_count(0)
+
+    product_page = home_page.navigate_to_product_page(product_card)
+
+    expect(product_page.add_to_cart_button).to_be_visible()
+    expect(product_page.add_to_cart_button).to_be_disabled()
 
 
 def test_category_page_navigation(page):
