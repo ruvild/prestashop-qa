@@ -6,6 +6,7 @@ from clients.admin_api.customers_client import CustomersClient
 from clients.admin_api.products_client import ProductsClient
 from clients.binshops.product_search_client import ProductSearchClient
 from clients.binshops.category_products_client import CategoryProductsClient
+from clients.binshops.cart_client import CartClient
 import os
 
 
@@ -46,3 +47,8 @@ def product_search_client():
 @pytest.fixture()
 def category_products_client():
     return CategoryProductsClient()
+
+
+@pytest.fixture()
+def cart_client(page):
+    return CartClient(page.request)

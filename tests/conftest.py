@@ -1,9 +1,13 @@
 import pytest
+from typing import Any
+from clients.binshops.base_client import BaseClient
 from collections.abc import Generator, Callable
 from factories.customer_factory import CustomerFactory
 from schemas.customer_schemas import CustomerCreateRequest
 from factories.product_factory import ProductFactory
 from schemas.product_schemas import ProductResponse
+from playwright.sync_api import APIResponse
+from schemas.order_schemas import OrderResponse
 
 
 @pytest.fixture()
@@ -38,9 +42,8 @@ def _delete_customer(customers_client, customer_id: int) -> None:
 
 @pytest.fixture
 def default_product(products_client) -> Generator[ProductResponse, None, None]:
-    client = products_client
     product = ProductFactory().create_base_product()
-    response = client.create_product(product)
+    response = products_client.create_product(product)
     product_id = response.productId
 
     try:
@@ -54,12 +57,53 @@ def default_product(products_client) -> Generator[ProductResponse, None, None]:
             "reference": "test_mug",
         }
 
-        patch_response = client.update_product(product_id, baseline_patch_data)
+        patch_response = products_client.update_product(product_id, baseline_patch_data)
 
         yield patch_response
 
     finally:
         try:
-            client.delete_product(product_id)
+            products_client.delete_product(product_id)
         except Exception as e:
             print(f"\n[Teardown Warning] Failed to delete product {product_id}: {e}")
+
+
+@pytest.fixture
+def get_order_info(page) -> Callable[[int], OrderResponse]:
+
+    def _make_request(order_id: int) -> OrderResponse:
+        url = BaseClient().build_url(f"orderhistory?id_order={order_id}")
+        response = page.request.get(url)
+        assert (
+            response.ok
+        ), f"Failed to fetch order info: {response.status} {response.text()}"
+        return OrderResponse.model_validate(response.json())
+
+    return _make_request
+
+
+@pytest.fixture
+def get_account_info(page) -> Callable[[], dict[str, Any]]:
+    def _make_request() -> dict[str, Any]:
+        url = BaseClient().build_url("accountInfo")
+        response = page.request.get(url)
+
+        assert (
+            response.ok
+        ), f"Failed to fetch account info: {response.status} {response.text()}"
+        return response.json()
+
+    return _make_request
+
+
+@pytest.fixture
+def login_user(page) -> Callable[[str, str], APIResponse]:
+    def _login(email: str, password: str) -> APIResponse:
+        response = page.request.post(
+            f"{BaseClient().build_url('login')}",
+            data={"email": email, "password": password},
+        )
+        assert response.ok, f"Login failed: {response.status} {response.text()}"
+        return response
+
+    return _login

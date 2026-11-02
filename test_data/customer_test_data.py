@@ -1,4 +1,5 @@
 import pytest
+from dataclasses import dataclass
 
 
 class CustomerTestData:
@@ -121,3 +122,17 @@ class CustomerTestData:
             id="non_existent_group",
         ),
     ]
+
+
+@dataclass(frozen=True)
+class AddressData:
+    address: str
+    city: str
+    state: str
+    zipcode: str
+    country: str
+
+
+DEFAULT_ADDRESS_DATA = AddressData(
+    "2685 California St", "Mountain View", "California", "94040", "United States"
+)
