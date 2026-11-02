@@ -7,6 +7,7 @@ from schemas.customer_schemas import CustomerCreateRequest
 from factories.product_factory import ProductFactory
 from schemas.product_schemas import ProductResponse
 from playwright.sync_api import APIResponse
+from schemas.order_schemas import OrderResponse
 
 
 @pytest.fixture()
@@ -68,15 +69,15 @@ def default_product(products_client) -> Generator[ProductResponse, None, None]:
 
 
 @pytest.fixture
-def get_order_info(page) -> Callable[[int], dict[str, Any]]:
+def get_order_info(page) -> Callable[[int], OrderResponse]:
 
-    def _make_request(order_id: int) -> dict[str, Any]:
+    def _make_request(order_id: int) -> OrderResponse:
         url = BaseClient().build_url(f"orderhistory?id_order={order_id}")
         response = page.request.get(url)
         assert (
             response.ok
         ), f"Failed to fetch order info: {response.status} {response.text()}"
-        return response.json()
+        return OrderResponse.model_validate(response.json())
 
     return _make_request
 

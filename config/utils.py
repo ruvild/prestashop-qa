@@ -4,6 +4,7 @@ import os
 import re
 from urllib.parse import urlparse, parse_qs
 from typing import Any
+import subprocess
 
 load_dotenv()
 
@@ -63,3 +64,28 @@ def product_url_parser(url: str) -> dict:
 def get_order_id_from_url(url: str) -> int:
     query_params = parse_qs(urlparse(url).query)
     return int(query_params["id_order"][0])
+
+
+def stock_changer(product_id, stock_quantity) -> None:
+
+    subprocess.run(
+        [
+            "docker",
+            "compose",
+            "exec",
+            "-T",
+            "mysql",
+            "mysql",
+            "-u",
+            f"{os.getenv('DB_USER')}",
+            f"-p{os.getenv('DB_ROOT_PASSWORD')}",
+            f"{os.getenv('DB_NAME')}",
+            "-e",
+            f"""
+            UPDATE ps_stock_available
+            SET quantity = {stock_quantity}
+            WHERE id_product = {product_id}
+            """,
+        ],
+        check=True,
+    )

@@ -3,10 +3,12 @@ from pages.cart_page import CartPage
 from playwright.sync_api import expect
 from test_data.customer_test_data import DEFAULT_ADDRESS_DATA
 from test_data.product_test_data import ADD_PRODUCT_TO_CART
+from test_data.product_test_data import ProductTestData
 from config.utils import get_order_id_from_url
 import re
-from schemas.cart_schemas import CartResponse
-from schemas.order_schemas import OrderResponse
+from config.utils import stock_changer
+import pytest
+from test_data.product_test_data import ProductToCart
 
 
 def test_cart_behavior(page, cart_client):
@@ -38,8 +40,7 @@ def test_cart_behavior(page, cart_client):
 
     assert int(product_quantity) == int(cart_quantity)
 
-    response_data = cart_client.get_cart_contents()
-    cart_res = CartResponse.model_validate(response_data)
+    cart_res = cart_client.get_cart_contents()
     api_products = cart_res.psdata.products
 
     matching_products = [
@@ -64,9 +65,7 @@ def test_full_checkout(
 
     login_user(default_customer.email, default_customer.password)
 
-    cart_response = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
-    cart_res = CartResponse.model_validate(cart_response)
-
+    cart_res = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
     assert cart_res.success
 
     cart_product = cart_res.psdata.products[0]
@@ -89,7 +88,7 @@ def test_full_checkout(
     expect(confirmation_page.order_details_block).to_be_visible()
 
     order_id = get_order_id_from_url(page.url)
-    order_res = OrderResponse.model_validate(get_order_info(order_id))
+    order_res = get_order_info(order_id)
     order_data = order_res.psdata
 
     assert order_data.details.id == order_id
@@ -123,3 +122,33 @@ def test_full_checkout(
         order_data.totals.total_including_tax.value
         == confirmation_page.total_value.inner_text()
     )
+
+
+@pytest.mark.parametrize(
+    "stock_quantity, requested_quantity, expected_error",
+    ProductTestData.PRODUCT_STOCK,
+)
+def test_stock(
+    login_user,
+    default_customer,
+    default_product,
+    cart_client,
+    stock_quantity,
+    requested_quantity,
+    expected_error,
+):
+    login_user(default_customer.email, default_customer.password)
+    product_id = default_product.productId
+    stock_changer(product_id, stock_quantity)
+
+    added_product = ProductToCart(
+        id_product=product_id, op="up", qty=requested_quantity
+    )
+    cart_res = cart_client.add_product_to_cart(added_product)
+
+    errors = cart_res.psdata.errors
+    if not expected_error:
+        assert not errors
+    else:
+        assert len(errors) == 1
+        assert expected_error in errors[0].lower()

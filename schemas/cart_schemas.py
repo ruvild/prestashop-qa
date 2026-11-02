@@ -9,6 +9,7 @@ class CartProduct(BaseModel):
 
 class CartData(BaseModel):
     products: list[CartProduct]
+    errors: list[str]
 
 
 class CartResponse(BaseModel):

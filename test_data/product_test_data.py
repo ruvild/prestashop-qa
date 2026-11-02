@@ -67,3 +67,9 @@ class ProductTestData:
         pytest.param(36, 40, id="no_products_above"),
         pytest.param(10, 11.89, id="no_products_below"),
     ]
+
+    PRODUCT_STOCK = [
+        pytest.param(0, 1, "no longer available", id="out_of_stock"),
+        pytest.param(1, 1, False, id="in_stock"),
+        pytest.param(1, 2, "adjust the quantity", id="more_than_stock"),
+    ]
