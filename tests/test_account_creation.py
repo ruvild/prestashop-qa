@@ -7,6 +7,8 @@ from requests import HTTPError
 from test_data.customer_test_data import CustomerTestData
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_register_required_ui(page, cleanup_customer, customers_client):
     customer = CustomerFactory.create_required_ui()
 
@@ -27,12 +29,16 @@ def test_register_required_ui(page, cleanup_customer, customers_client):
     assert saved_customer.firstname == customer.first_name
 
 
+@pytest.mark.regression
+@pytest.mark.ui
 def test_register_empty_ui(page):
     current_page = RegistrationPage(page).navigate().register_empty()
     expect(page).to_have_url(current_page.url)
     expect(current_page.email).to_be_visible()
 
 
+@pytest.mark.regression
+@pytest.mark.hybrid
 def test_register_optionals_ui(page, cleanup_customer, customers_client):
     customer = CustomerFactory.create_full_ui()
 
@@ -49,6 +55,8 @@ def test_register_optionals_ui(page, cleanup_customer, customers_client):
     assert saved_customer.firstname == customer.first_name
 
 
+@pytest.mark.smoke
+@pytest.mark.api
 def test_register_required_api(cleanup_customer, customers_client):
     customer = CustomerFactory().create_required_api()
 
@@ -62,6 +70,8 @@ def test_register_required_api(cleanup_customer, customers_client):
     assert "password" not in response_dict
 
 
+@pytest.mark.regression
+@pytest.mark.api
 def test_register_full_api(customers_client, cleanup_customer):
     customer = CustomerFactory().create_full_api()
 
@@ -75,6 +85,8 @@ def test_register_full_api(customers_client, cleanup_customer):
     assert "password" not in response_dict
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("field_name", ["firstName", "lastName"])
 @pytest.mark.parametrize("valid_value", CustomerTestData.VALID_NAMES)
 def test_register_valid_name_fields(
@@ -92,6 +104,8 @@ def test_register_valid_name_fields(
     assert getattr(saved_customer, returned_field_name) == getattr(customer, field_name)
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("field_name", ["firstName", "lastName"])
 @pytest.mark.parametrize("invalid_value", CustomerTestData.INVALID_NAMES)
 def test_register_invalid_name_fields(
@@ -109,6 +123,8 @@ def test_register_invalid_name_fields(
     assert "Unprocessable Content" in str(exc_info.value)
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("valid_value", CustomerTestData.VALID_EMAILS)
 def test_register_valid_email_field(valid_value, cleanup_customer, customers_client):
     customer = CustomerFactory().create_required_api()
@@ -121,6 +137,8 @@ def test_register_valid_email_field(valid_value, cleanup_customer, customers_cli
     assert saved_customer.email == customer.email
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("invalid_value", CustomerTestData.INVALID_EMAILS)
 def test_register_invalid_email_field(
     invalid_value, cleanup_customer, customers_client
@@ -136,6 +154,8 @@ def test_register_invalid_email_field(
     assert "Unprocessable Content" in str(exc_info.value)
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("valid_value", CustomerTestData.VALID_PASSWORDS)
 def test_register_valid_password_field(valid_value, cleanup_customer, customers_client):
     customer = CustomerFactory().create_required_api()
@@ -148,6 +168,8 @@ def test_register_valid_password_field(valid_value, cleanup_customer, customers_
     assert saved_customer.email == customer.email
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("invalid_value", CustomerTestData.INVALID_PASSWORDS)
 def test_register_invalid_password_field(
     invalid_value, cleanup_customer, customers_client
@@ -163,6 +185,8 @@ def test_register_invalid_password_field(
     assert "Unprocessable Content" in str(exc_info.value)
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("groups,default_group", CustomerTestData.VALID_GROUPS)
 def test_register_valid_groups(
     groups, default_group, cleanup_customer, customers_client
@@ -181,6 +205,8 @@ def test_register_valid_groups(
     assert expected_groups == actual_groups
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("groups,default_group", CustomerTestData.INVALID_GROUPS)
 def test_register_invalid_groups(
     groups, default_group, cleanup_customer, customers_client

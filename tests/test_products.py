@@ -11,6 +11,8 @@ from config.utils import product_url_parser
 import re
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_product_navigation(page, products_client):
 
     current_page = HomePage(page).navigate()
@@ -27,6 +29,8 @@ def test_product_navigation(page, products_client):
     assert product_name == product_data["names"]["en-US"]
 
 
+@pytest.mark.regression
+@pytest.mark.ui
 def test_product_quick_view(page):
 
     current_page = HomePage(page).navigate()
@@ -40,6 +44,8 @@ def test_product_quick_view(page):
     expect(product_page.add_to_cart_button).to_be_visible()
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_new_product(page, default_product):
 
     current_page = HomePage(page).navigate()
@@ -49,6 +55,8 @@ def test_new_product(page, default_product):
     expect(new_product_banner).to_be_visible()
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_out_of_stock_product_ui(page, default_product):
     home_page = HomePage(page).navigate()
     product_card = home_page.get_product_from_new_arrivals(default_product.productId)
@@ -62,12 +70,16 @@ def test_out_of_stock_product_ui(page, default_product):
     expect(product_page.add_to_cart_button).to_be_disabled()
 
 
+@pytest.mark.regression
+@pytest.mark.ui
 def test_category_page_navigation(page):
     current_page = BasePage(page).navigate().navigate_to_category_page()
     expect(current_page.filter_block).to_be_visible()
     expect(current_page.product_section).to_be_visible()
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_filters_ui(page, category_products_client, subcategory=HOME_ACCESSORIES):
 
     BasePage(page).navigate().navigate_to_category_page(subcategory=subcategory)
@@ -87,6 +99,8 @@ def test_filters_ui(page, category_products_client, subcategory=HOME_ACCESSORIES
     assert filtered_products_ids_ui == filtered_products_ids_api
 
 
+@pytest.mark.regression
+@pytest.mark.api
 def test_category_filters_api(
     products_client, category_products_client, subcategory=HOME_ACCESSORIES
 ):
@@ -97,6 +111,8 @@ def test_category_filters_api(
     assert id_set_bin == id_set_prest
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize(
     "lowest_price,highest_price", ProductTestData.PRODUCT_PRICE_RANGES_EXIST
 )
@@ -118,6 +134,8 @@ def test_price_filters_match_api(
     )
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize(
     "lowest_price,highest_price", ProductTestData.PRODUCT_PRICE_RANGES_NOT_EXIST
 )
@@ -136,18 +154,24 @@ def test_price_filters_no_match_api(
     assert not search_list
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_ERROR)
 def test_product_search_error(query, product_search_client):
     response = product_search_client.search_products(query=query)
     assert response["success"] is False
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_NO_MATCHES)
 def test_product_search_no_matches(query, product_search_client):
     response = product_search_client.search_products(query=query)
     assert not response["psdata"]["products"]
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.xfail(
     reason="Binshops productSearch crashes when a product has no image",
     strict=True,
@@ -160,6 +184,8 @@ def test_product_search_match_found(query, default_product, product_search_clien
     assert new_product_id in product_ids
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize("field, sort_order", ProductTestData.PRODUCT_SORTING_METHODS)
 def test_product_sorting(field, sort_order, product_search_client):
     response = product_search_client.search_products(sort_order=sort_order)
@@ -176,6 +202,8 @@ def test_product_sorting(field, sort_order, product_search_client):
         assert search_list == sorted(search_list)
 
 
+@pytest.mark.regression
+@pytest.mark.hybrid
 def test_product_color_selection(page, products_client):
     product_page = ProductPage(page)
     page.goto(f"{product_page.base_url}1-1-hummingbird-printed-t-shirt.html")
@@ -203,6 +231,8 @@ def test_product_color_selection(page, products_client):
     )
 
 
+@pytest.mark.regression
+@pytest.mark.api
 def test_pagination_api(product_search_client):
     results_per_page = 2
 

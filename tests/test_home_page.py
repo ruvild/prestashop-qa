@@ -2,13 +2,18 @@ from pages.home_page import HomePage
 from playwright.sync_api import expect
 from config.utils import extract_product_ids
 from config.utils import binshops_product_extractor
+import pytest
 
 
+@pytest.mark.regression
+@pytest.mark.ui
 def test_category_top_menu_ui(page):
     current_page = HomePage(page).navigate().expand_category_top_menu()
     expect(current_page.category_sublink).to_be_visible()
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_search_bar_ui(page, product_search_client):
 
     search_keyword = "hummingbird"
@@ -25,6 +30,8 @@ def test_search_bar_ui(page, product_search_client):
     assert set(extract_product_ids(product_id_list_ui)) <= set(product_id_list_api)
 
 
+@pytest.mark.smoke
+@pytest.mark.ui
 def test_main_elements_ui(page):
     current_page = HomePage(page).navigate()
 
@@ -33,6 +40,8 @@ def test_main_elements_ui(page):
     expect(current_page.special_deals_block).to_be_visible()
 
 
+@pytest.mark.regression
+@pytest.mark.ui
 def test_footer_ui(page):
     current_page = HomePage(page).navigate()
 
