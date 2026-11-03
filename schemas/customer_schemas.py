@@ -11,6 +11,28 @@ class CustomerRegistrationUI(BaseModel):
     birthdate: str = ""
 
 
+class CustomerResponse(BaseModel):
+    customerId: int
+    firstName: str
+    lastName: str
+    email: EmailStr
+    defaultGroupId: int
+    groupIds: list[int]
+    genderId: int
+    enabled: bool
+    newsletterSubscribed: bool
+    partnerOffersSubscribed: bool
+    birthday: str
+    companyName: str
+    siretCode: str
+    apeCode: str
+    website: str
+    allowedOutstandingAmount: float
+    maxPaymentDays: int
+    riskId: int
+    guest: bool
+
+
 class CustomerSearchResponse(BaseModel):
     idCustomer: int
     firstname: str

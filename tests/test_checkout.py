@@ -11,6 +11,8 @@ import pytest
 from test_data.product_test_data import ProductToCart
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_cart_behavior(page, cart_client):
     home_page = HomePage(page).navigate()
     product = home_page.get_featured_product()
@@ -58,6 +60,8 @@ def test_cart_behavior(page, cart_client):
     assert matching_products[0].cart_quantity == int(cart_quantity)
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_full_checkout(
     page, default_customer, cart_client, get_order_info, customers_client, login_user
 ):
@@ -102,7 +106,7 @@ def test_full_checkout(
     assert order_product.product_attribute_id == cart_product.id_product_attribute
     assert order_product.quantity == cart_product.cart_quantity
 
-    customer_data = customers_client.search_customer(default_customer.email)
+    customer_data = customers_client.search_customer_by_email(default_customer.email)
     assert order_data.addresses.delivery.id_customer == customer_data.idCustomer
 
     order_details = order_data.details
@@ -124,6 +128,8 @@ def test_full_checkout(
     )
 
 
+@pytest.mark.regression
+@pytest.mark.api
 @pytest.mark.parametrize(
     "stock_quantity, requested_quantity, expected_error",
     ProductTestData.PRODUCT_STOCK,

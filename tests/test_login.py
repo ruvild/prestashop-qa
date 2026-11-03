@@ -1,7 +1,10 @@
 from pages.login_page import LoginPage
 from playwright.sync_api import expect
+import pytest
 
 
+@pytest.mark.smoke
+@pytest.mark.hybrid
 def test_valid_login_logout_ui(page, default_customer, get_account_info):
     customer = default_customer
     current_page = LoginPage(page).navigate().sign_in(customer.email, customer.password)
@@ -24,6 +27,8 @@ def test_valid_login_logout_ui(page, default_customer, get_account_info):
     assert "Not Authenticated" in account["message"]
 
 
+@pytest.mark.regression
+@pytest.mark.ui
 def test_invalid_password_login_ui(page, default_customer):
     customer = default_customer
     current_page = (
