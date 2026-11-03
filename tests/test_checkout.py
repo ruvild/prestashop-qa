@@ -106,7 +106,7 @@ def test_full_checkout(
     assert order_product.product_attribute_id == cart_product.id_product_attribute
     assert order_product.quantity == cart_product.cart_quantity
 
-    customer_data = customers_client.search_customer(default_customer.email)
+    customer_data = customers_client.search_customer_by_email(default_customer.email)
     assert order_data.addresses.delivery.id_customer == customer_data.idCustomer
 
     order_details = order_data.details

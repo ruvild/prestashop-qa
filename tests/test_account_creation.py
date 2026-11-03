@@ -5,6 +5,7 @@ from factories.customer_factory import CustomerFactory
 import pytest
 from requests import HTTPError
 from test_data.customer_test_data import CustomerTestData
+import os
 
 
 @pytest.mark.smoke
@@ -23,7 +24,7 @@ def test_register_required_ui(page, cleanup_customer, customers_client):
     expect(page).to_have_url(current_page.url)
     expect(current_page.account_header).to_be_visible()
 
-    saved_customer = customers_client.search_customer(customer.email)
+    saved_customer = customers_client.search_customer_by_email(customer.email)
     cleanup_customer(saved_customer.idCustomer)
 
     assert saved_customer.firstname == customer.first_name
@@ -49,7 +50,7 @@ def test_register_optionals_ui(page, cleanup_customer, customers_client):
     expect(page).to_have_url(current_page.url)
     expect(current_page.account_header).to_be_visible()
 
-    saved_customer = customers_client.search_customer(customer.email)
+    saved_customer = customers_client.search_customer_by_email(customer.email)
     cleanup_customer(saved_customer.idCustomer)
 
     assert saved_customer.firstname == customer.first_name
@@ -63,8 +64,8 @@ def test_register_required_api(cleanup_customer, customers_client):
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
-    saved_customer = customers_client.search_customer(customer_response.customerId)
-    assert saved_customer.firstname == customer.firstName
+    saved_customer = customers_client.get_customer(customer_response.customerId)
+    assert saved_customer.firstName == customer.firstName
 
     response_dict = customer_response.model_dump()
     assert "password" not in response_dict
@@ -78,8 +79,8 @@ def test_register_full_api(customers_client, cleanup_customer):
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
-    saved_customer = customers_client.search_customer(customer_response.customerId)
-    assert saved_customer.firstname == customer.firstName
+    saved_customer = customers_client.get_customer(customer_response.customerId)
+    assert saved_customer.firstName == customer.firstName
 
     response_dict = customer_response.model_dump()
     assert "password" not in response_dict
@@ -98,10 +99,9 @@ def test_register_valid_name_fields(
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
-    saved_customer = customers_client.search_customer(customer_response.customerId)
+    saved_customer = customers_client.get_customer(customer_response.customerId)
 
-    returned_field_name = field_name.lower()
-    assert getattr(saved_customer, returned_field_name) == getattr(customer, field_name)
+    assert getattr(saved_customer, field_name) == getattr(customer, field_name)
 
 
 @pytest.mark.regression
@@ -133,7 +133,7 @@ def test_register_valid_email_field(valid_value, cleanup_customer, customers_cli
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
-    saved_customer = customers_client.search_customer(customer_response.customerId)
+    saved_customer = customers_client.get_customer(customer_response.customerId)
     assert saved_customer.email == customer.email
 
 
@@ -164,7 +164,7 @@ def test_register_valid_password_field(valid_value, cleanup_customer, customers_
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
-    saved_customer = customers_client.search_customer(customer_response.customerId)
+    saved_customer = customers_client.get_customer(customer_response.customerId)
     assert saved_customer.email == customer.email
 
 
@@ -198,11 +198,9 @@ def test_register_valid_groups(
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
-    saved_customer = customers_client.search_customer(customer_response.customerId)
+    saved_customer = customers_client.get_customer(customer_response.customerId)
 
-    expected_groups = set(customer.groupIds)
-    actual_groups = {int(k) for k in saved_customer.groups.keys()}
-    assert expected_groups == actual_groups
+    assert set(customer.groupIds) == set(saved_customer.groupIds)
 
 
 @pytest.mark.regression
