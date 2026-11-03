@@ -2,6 +2,7 @@ from pages.base_page import BasePage
 from pages.order_confirmation_page import OrderConfirmationPage
 from typing import Self
 from test_data.customer_test_data import AddressData
+from playwright.sync_api import expect
 
 
 class OrderPage(BasePage):
@@ -24,7 +25,9 @@ class OrderPage(BasePage):
         self.place_order_button = page.get_by_role("button", name="order")
 
     def insert_address(self, address_data: AddressData) -> Self:
+        self.country.click()
         self.country.select_option(label=address_data.country)
+        self.state.click()
         self.state.select_option(label=address_data.state)
         self.address.fill(address_data.address)
         self.city.fill(address_data.city)
