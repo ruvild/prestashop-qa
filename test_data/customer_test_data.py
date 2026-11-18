@@ -136,3 +136,33 @@ class AddressData:
 DEFAULT_ADDRESS_DATA = AddressData(
     "2685 California St", "Mountain View", "California", "94040", "United States"
 )
+
+
+class LoginTestData:
+    SENSITIVE_USER_FIELDS = {
+        "passwd",
+        "secure_key",
+        "last_passwd_gen",
+        "reset_password_token",
+        "reset_password_validity",
+    }
+
+    MISSING_EMAIL_PAYLOADS = [
+        pytest.param({"email": "", "password": "ValidPassword1!"}, id="empty_email"),
+        pytest.param({"password": "ValidPassword1!"}, id="omitted_email"),
+        pytest.param({}, id="empty_payload"),
+    ]
+
+    INVALID_EMAILS = [
+        pytest.param("not-an-email", id="no_at_symbol"),
+        pytest.param("user@", id="missing_domain"),
+        pytest.param("@example.com", id="missing_local"),
+        pytest.param("user @example.com", id="whitespace"),
+        pytest.param("user@example", id="missing_tld"),
+    ]
+
+    MISSING_PASSWORD_PAYLOADS = [
+        pytest.param({"email": "user@example.com", "password": ""}, id="empty_password"),
+        pytest.param({"email": "user@example.com"}, id="omitted_password"),
+    ]
+
