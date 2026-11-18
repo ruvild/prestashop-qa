@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Literal
 
 
@@ -85,3 +85,9 @@ class CustomerCreateResponse(BaseModel):
     maxPaymentDays: int
     riskId: int
     guest: bool
+
+
+class CustomerPatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool | None = None

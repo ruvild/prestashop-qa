@@ -3,6 +3,7 @@ from schemas.customer_schemas import CustomerSearchResponse
 from schemas.customer_schemas import (
     CustomerCreateRequest,
     CustomerCreateResponse,
+    CustomerPatchRequest,
     CustomerResponse,
 )
 from requests import Response
@@ -47,6 +48,14 @@ class CustomersClient(BaseClient):
             f"Customer {customer_data.get('email')} created with id: {customer_data.get('customerId')}"
         )
         return CustomerCreateResponse.model_validate(customer_data)
+
+    def update_customer(self, customer_id: int, patch_data: dict) -> CustomerResponse:
+        url = self.build_url(f"{self.endpoint}/{customer_id}")
+        validated_patch_data = CustomerPatchRequest.model_validate(patch_data)
+        payload: dict = validated_patch_data.model_dump(exclude_none=True)
+        res = self.session.patch(url, headers=self.auth_header, json=payload)
+        res.raise_for_status()
+        return CustomerResponse.model_validate(res.json())
 
     def delete_customer(self, customer_id: int) -> Response:
         url = self.build_url(f"{self.endpoint}/{customer_id}")
