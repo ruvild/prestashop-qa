@@ -96,8 +96,6 @@ def test_filters_ui(page, category_products_client, subcategory=HOME_ACCESSORIES
 
     assert filtered_products_ids_ui == filtered_products_ids_api
 
-    assert filtered_products_ids_ui == filtered_products_ids_api
-
 
 @pytest.mark.regression
 @pytest.mark.api
