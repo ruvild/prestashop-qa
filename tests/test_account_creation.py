@@ -5,7 +5,6 @@ from factories.customer_factory import CustomerFactory
 import pytest
 from requests import HTTPError
 from test_data.customer_test_data import CustomerTestData
-import os
 
 
 @pytest.mark.smoke
@@ -118,9 +117,9 @@ def test_register_invalid_name_fields(
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert "Unprocessable Content" in str(exc_info.value)
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
 
 
 @pytest.mark.regression
@@ -149,9 +148,9 @@ def test_register_invalid_email_field(
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert "Unprocessable Content" in str(exc_info.value)
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
 
 
 @pytest.mark.regression
@@ -180,9 +179,9 @@ def test_register_invalid_password_field(
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert "Unprocessable Content" in str(exc_info.value)
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
 
 
 @pytest.mark.regression
@@ -216,8 +215,6 @@ def test_register_invalid_groups(
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert ("Unprocessable Content" in str(exc_info.value)) or (
-        "Bad Request" in str(exc_info.value)
-    )
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code in (400, 422)

@@ -34,7 +34,8 @@ A containerized testing framework for **PrestaShop** (with the additional **Bins
 
 * **Isolated Container Environment:** Spins up local PrestaShop and MySQL containers automatically via `compose.yaml`.
 * **Hybrid Testing Strategy:** Blends fast API setup/teardown validations (using Pydantic models/schemas) with deep UI automation using the Page Object Model (POM).
-* **Parallel Execution & Cross-Browser:** Built to run tests across Chromium, Firefox, and WebKit simultaneously via `pytest-xdist`.
+* **Parallel Execution & Cross-Browser:** Built to run tests across Chromium, Firefox, and WebKit simultaneously via `pytest-xdist`, with per-worker Admin API OAuth clients provisioned dynamically.
+* **Seeded Demo Storefront:** Catalog, category, and search tests run against PrestaShop's default seeded demo data in a fresh container, while dynamically created customers and products are cleaned up per test.
 * **Automated CI/CD:** GitHub Actions pipeline features intelligent caching for Playwright dependencies and automatic artifact capture (failure screenshots, server logs, and HTML reports). The test suite runs automatically on every push or pull request via GitHub Actions.
 
 ![GitHub Actions Pipeline Run](docs/assets/ci_pipeline_steps.png)
@@ -58,6 +59,7 @@ prestashop-qa/
 ├── scripts/                    # Environment provisioning & API client initialization scripts
 ├── test_data/                  # Test data and predefined input values
 ├── tests/                      # UI & API test modules, test data, and scoped fixtures
+├── .env.example                # Environment variable template
 ├── .gitignore                  # Git tracking rules
 ├── compose.yaml                # PrestaShop & MySQL container orchestration
 ├── conftest.py                 # Global Pytest fixtures, CI auto-provisioning, and OAuth tokens
@@ -85,16 +87,16 @@ pip install -r requirements.txt
 
 ## 2. Configure Environment Variables
 
-Create a `.env` file in the project root with the required environment variables:
+Copy `.env.example` to `.env` in the project root and adjust the values if needed:
 
 ```dotenv
 BASE_URL=http://localhost:8080/
-DB_NAME=your_database_name
-DB_USER=your_database_user
+DB_NAME=prestashop
+DB_USER=root
 DB_ROOT_PASSWORD=your_database_root_password
 ```
 
-These variables are used by the environment provisioning.
+These variables are used by Docker Compose and the environment provisioning scripts.
 
 ## 3. Environment Provisioning
 

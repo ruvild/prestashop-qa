@@ -2,7 +2,6 @@ from pages.base_page import BasePage
 from pages.order_confirmation_page import OrderConfirmationPage
 from typing import Self
 from test_data.customer_test_data import AddressData
-from playwright.sync_api import expect
 
 
 class OrderPage(BasePage):

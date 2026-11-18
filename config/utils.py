@@ -67,7 +67,8 @@ def get_order_id_from_url(url: str) -> int:
 
 
 def stock_changer(product_id, stock_quantity) -> None:
-
+    # PrestaShop's Admin API does not expose a product stock update endpoint,
+    # so stock quantities are adjusted directly in MySQL for test setup.
     subprocess.run(
         [
             "docker",
