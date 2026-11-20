@@ -1,12 +1,15 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Self
+
 from playwright.sync_api import Page
-from typing import Self
-from config.utils import url_joiner, get_env
-from test_data.product_test_data import TestCategory, ACCESSORIES
+
+from config.utils import get_env, url_joiner
+from test_data.product_test_data import ACCESSORIES, TestCategory
 
 if TYPE_CHECKING:
-    from pages.login_page import LoginPage
     from pages.category_page import CategoryPage
+    from pages.login_page import LoginPage
 
 
 class BasePage:

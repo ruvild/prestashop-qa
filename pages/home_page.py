@@ -1,13 +1,14 @@
+from playwright.sync_api import Locator, Page
+
 from pages.base_page import BasePage
-from playwright.sync_api import Locator
-from pages.product_page import ProductPage
 from pages.cart_page import CartPage
+from pages.product_page import ProductPage
 
 ADD_TO_CART_BUTTON = '[data-button-action="add-to-cart"]'
 
 
 class HomePage(BasePage):
-    def __init__(self, page) -> None:
+    def __init__(self, page: Page) -> None:
         super().__init__(page)
 
         self.carousel = page.get_by_label("Carousel container")

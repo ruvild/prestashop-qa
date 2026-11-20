@@ -1,10 +1,10 @@
 from pages.base_page import BasePage
 from pages.order_page import OrderPage
-from playwright.sync_api import Locator
+from playwright.sync_api import Locator, Page
 
 
 class CartPage(BasePage):
-    def __init__(self, page) -> None:
+    def __init__(self, page: Page) -> None:
         super().__init__(page)
         self.endpoint = "cart?action=show"
 

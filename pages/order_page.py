@@ -1,11 +1,14 @@
+from typing import Self
+
+from playwright.sync_api import Page
+
 from pages.base_page import BasePage
 from pages.order_confirmation_page import OrderConfirmationPage
-from typing import Self
 from test_data.customer_test_data import AddressData
 
 
 class OrderPage(BasePage):
-    def __init__(self, page) -> None:
+    def __init__(self, page: Page) -> None:
         super().__init__(page)
         self.endpoint = "order"
 
