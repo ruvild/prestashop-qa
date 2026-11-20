@@ -1,7 +1,12 @@
-import requests
-from config.utils import get_env, url_joiner
+import logging
 import subprocess
+
+import requests
+
 from config.permissions import ALL_PERMISSIONS
+from config.utils import get_env, url_joiner
+
+logger = logging.getLogger(__name__)
 
 
 class ApiClientSetup:
@@ -42,11 +47,11 @@ class ApiClientSetup:
 
         if result.returncode != 0:
             if "not found" in result.stdout.lower():
-                print("API client doesn't exist. Continuing...")
+                logger.info("API client doesn't exist. Continuing...")
                 return
             raise Exception(result.stderr)
 
-        print(f"Client {self.admin_api_client_id} deleted.")
+        logger.info("Client %s deleted.", self.admin_api_client_id)
 
     def _create_api_client(self) -> str:
         result = subprocess.run(
@@ -74,7 +79,7 @@ class ApiClientSetup:
             raise Exception(result.stderr)
 
         secret = result.stdout.strip()
-        print(f"Client {self.admin_api_client_id} created.")
+        logger.info("Client %s created.", self.admin_api_client_id)
         return secret
 
     def _generate_access_token(self, secret: str) -> str:
@@ -85,12 +90,12 @@ class ApiClientSetup:
             "scope[]": ALL_PERMISSIONS,
         }
         res = requests.post(
-            f"{url_joiner(self.base_url,'admin-api/access_token')}",
+            url_joiner(self.base_url, "admin-api/access_token"),
             data=payload,
             timeout=30,
         )
         res.raise_for_status()
         access_token = res.json()["access_token"]
-        print("Access token generated.")
+        logger.info("Access token generated.")
 
         return access_token

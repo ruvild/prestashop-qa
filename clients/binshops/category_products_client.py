@@ -1,6 +1,7 @@
+from typing import Any
+
 from clients.binshops.base_client import BaseClient
 from test_data.product_test_data import TestCategory
-from typing import Any
 
 
 class CategoryProductsClient(BaseClient):
@@ -17,7 +18,7 @@ class CategoryProductsClient(BaseClient):
         params = {"id_category": category.id}
         if additional_filters:
             params |= additional_filters
-        res = self.session.get(url, params=params)
+        res = self.session.get(url, params=params, timeout=self.timeout)
         res.raise_for_status()
 
         return res.json()

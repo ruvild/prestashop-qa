@@ -1,5 +1,6 @@
-from clients.binshops.base_client import BaseClient
 from typing import Any
+
+from clients.binshops.base_client import BaseClient
 
 
 class ProductSearchClient(BaseClient):
@@ -25,6 +26,6 @@ class ProductSearchClient(BaseClient):
         params = {key: value for key, value in params.items() if value is not None}
 
         url = self.build_url(self.endpoint)
-        res = self.session.get(url, params=params)
+        res = self.session.get(url, params=params, timeout=self.timeout)
         res.raise_for_status()
         return res.json()

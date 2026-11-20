@@ -1,10 +1,10 @@
-from urllib.parse import urljoin
-from dotenv import load_dotenv
 import os
 import re
-from urllib.parse import urlparse, parse_qs
-from typing import Any
 import subprocess
+from typing import Any
+from urllib.parse import parse_qs, urljoin, urlparse
+
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -20,15 +20,21 @@ def url_joiner(base_url: str, endpoint: str) -> str:
     return urljoin(base_url.rstrip("/") + "/", endpoint.lstrip("/"))
 
 
-def extract_product_ids(id_list: list) -> list:
-    return [int(re.sub(r"\D", "", product_id)) for product_id in id_list]
+def extract_product_ids(id_list: list[str | None]) -> list[int]:
+    return [
+        int(re.sub(r"\D", "", product_id))
+        for product_id in id_list
+        if product_id is not None
+    ]
 
 
-def binshops_product_extractor(field: str, search_response: dict[str, Any]) -> list:
+def binshops_product_extractor(
+    field: str, search_response: dict[str, Any]
+) -> list[Any]:
     return [product[field] for product in search_response["psdata"]["products"]]
 
 
-def product_url_parser(url: str) -> dict:
+def product_url_parser(url: str) -> dict[str, Any]:
     parsed_url = urlparse(url)
 
     product_match = re.search(
@@ -66,7 +72,7 @@ def get_order_id_from_url(url: str) -> int:
     return int(query_params["id_order"][0])
 
 
-def stock_changer(product_id, stock_quantity) -> None:
+def stock_changer(product_id: int, stock_quantity: int) -> None:
     # PrestaShop's Admin API does not expose a product stock update endpoint,
     # so stock quantities are adjusted directly in MySQL for test setup.
     subprocess.run(
@@ -78,9 +84,9 @@ def stock_changer(product_id, stock_quantity) -> None:
             "mysql",
             "mysql",
             "-u",
-            f"{os.getenv('DB_USER')}",
-            f"-p{os.getenv('DB_ROOT_PASSWORD')}",
-            f"{os.getenv('DB_NAME')}",
+            get_env("DB_USER"),
+            f"-p{get_env('DB_ROOT_PASSWORD')}",
+            get_env("DB_NAME"),
             "-e",
             f"""
             UPDATE ps_stock_available
