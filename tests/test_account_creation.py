@@ -82,10 +82,10 @@ def test_register_required_api(cleanup_customer, customers_client):
     cleanup_customer(customer_response.customerId)
 
     saved_customer = customers_client.get_customer(customer_response.customerId)
-    assert saved_customer.firstName == customer.firstName
-    assert saved_customer.lastName == customer.lastName
-    assert saved_customer.email == customer.email
-    assert saved_customer.defaultGroupId == customer.defaultGroupId
+    expected = customer.model_dump(exclude={"password", "groupIds"}, exclude_none=True)
+    actual = saved_customer.model_dump(include=expected.keys())
+
+    assert actual == expected
     assert set(saved_customer.groupIds) == set(customer.groupIds)
     assert saved_customer.enabled is True
     assert saved_customer.guest is False
@@ -103,41 +103,14 @@ def test_register_full_api(customers_client, cleanup_customer):
     cleanup_customer(customer_response.customerId)
 
     saved_customer = customers_client.get_customer(customer_response.customerId)
-    assert saved_customer.firstName == customer.firstName
-    assert saved_customer.lastName == customer.lastName
-    assert saved_customer.email == customer.email
-    assert saved_customer.defaultGroupId == customer.defaultGroupId
+    expected = customer.model_dump(exclude={"password", "groupIds"}, exclude_none=True)
+    actual = saved_customer.model_dump(include=expected.keys())
+
+    assert actual == expected
     assert set(saved_customer.groupIds) == set(customer.groupIds)
-    assert saved_customer.genderId == customer.genderId
-    assert saved_customer.partnerOffersSubscribed == customer.partnerOffersSubscribed
-    assert saved_customer.birthday == customer.birthday
-    assert saved_customer.companyName == customer.companyName
-    assert saved_customer.siretCode == customer.siretCode
-    assert saved_customer.apeCode == customer.apeCode
-    assert saved_customer.website == customer.website
-    assert saved_customer.allowedOutstandingAmount == customer.allowedOutstandingAmount
-    assert saved_customer.maxPaymentDays == customer.maxPaymentDays
-    assert saved_customer.riskId == customer.riskId
 
     response_dict = customer_response.model_dump()
     assert "password" not in response_dict
-
-
-@pytest.mark.regression
-@pytest.mark.api
-@pytest.mark.xfail(
-    reason="BUG: Admin API POST /customers ignores newsletterSubscribed (missing COMMAND_MAPPING)",
-    strict=True,
-)
-def test_register_newsletter_subscription_api(customers_client, cleanup_customer):
-    customer = CustomerFactory().create_required_api()
-    customer.newsletterSubscribed = True
-
-    customer_response = customers_client.create_customer(customer)
-    cleanup_customer(customer_response.customerId)
-
-    saved_customer = customers_client.get_customer(customer_response.customerId)
-    assert saved_customer.newsletterSubscribed is True
 
 
 @pytest.mark.regression

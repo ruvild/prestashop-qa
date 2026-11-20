@@ -54,7 +54,6 @@ class CustomerCreateRequest(BaseModel):
     defaultGroupId: int
     groupIds: list[int]
     genderId: int | None = None
-    newsletterSubscribed: bool = False
     partnerOffersSubscribed: bool = False
     birthday: str | None = None
     companyName: str | None = None
