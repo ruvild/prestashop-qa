@@ -6,7 +6,32 @@ on:
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: "pip"
+
+      - name: Install lint & format tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run Ruff lint
+        run: ruff check .
+
+      - name: Run Black format check
+        run: black --check .
+
   prestashop-tester:
+    needs: lint
     runs-on: ubuntu-latest    
 
     steps:
@@ -53,7 +78,7 @@ jobs:
       - name: Run Pytest Suite
         run: |          
           export DB_ROOT_PASSWORD=$(openssl rand -hex 16)
-          pytest -n auto --browser chromium --browser firefox --browser webkit --screenshot=only-on-failure --output=screenshots       
+          pytest -n auto --browser chromium --browser firefox --browser webkit --screenshot=only-on-failure --tracing=retain-on-failure --output=test-results       
         env:
           CI: "true"
           BASE_URL: "http://localhost:8080/"
@@ -83,10 +108,10 @@ jobs:
           name: docker-debug-logs
           path: logs/
       
-      - name: Upload Failure Screenshots
+      - name: Upload Failure Screenshots & Traces
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-failure-screenshots
-          path: screenshots/
+          name: playwright-failure-artifacts
+          path: test-results/
           retention-days: 14

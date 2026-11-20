@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class CustomerRegistrationUI(BaseModel):

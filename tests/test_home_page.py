@@ -1,8 +1,8 @@
-from pages.home_page import HomePage
-from playwright.sync_api import expect
-from config.utils import extract_product_ids
-from config.utils import binshops_product_extractor
 import pytest
+from playwright.sync_api import expect
+
+from config.utils import binshops_product_extractor, extract_product_ids
+from pages.home_page import HomePage
 
 
 @pytest.mark.regression

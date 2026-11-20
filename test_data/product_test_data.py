@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from pydantic import BaseModel
 from typing import Literal
+
 import pytest
+from pydantic import BaseModel
 
 
 @dataclass(frozen=True)
