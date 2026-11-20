@@ -1,14 +1,17 @@
-from pages.home_page import HomePage
-from pages.cart_page import CartPage
-from playwright.sync_api import expect
-from test_data.customer_test_data import DEFAULT_ADDRESS_DATA
-from test_data.product_test_data import ADD_PRODUCT_TO_CART
-from test_data.product_test_data import ProductTestData
-from config.utils import get_order_id_from_url
 import re
-from config.utils import stock_changer
+
 import pytest
-from test_data.product_test_data import ProductToCart
+from playwright.sync_api import expect
+
+from config.utils import get_order_id_from_url, stock_changer
+from pages.cart_page import CartPage
+from pages.home_page import HomePage
+from test_data.customer_test_data import DEFAULT_ADDRESS_DATA
+from test_data.product_test_data import (
+    ADD_PRODUCT_TO_CART,
+    ProductTestData,
+    ProductToCart,
+)
 
 
 @pytest.mark.smoke
@@ -63,11 +66,19 @@ def test_cart_behavior(page, cart_client):
 @pytest.mark.smoke
 @pytest.mark.hybrid
 def test_full_checkout(
-    page, default_customer, cart_client, get_order_info, customers_client, login_user
+    page,
+    default_customer,
+    cart_client,
+    get_order_info,
+    customers_client,
+    browser_auth_client,
 ):
     cart_page = CartPage(page)
 
-    login_user(default_customer.email, default_customer.password)
+    login_res = browser_auth_client.login(
+        email=default_customer.email, password=default_customer.password
+    )
+    assert login_res.success is True
 
     cart_res = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
     assert cart_res.success
@@ -135,22 +146,25 @@ def test_full_checkout(
     ProductTestData.PRODUCT_STOCK,
 )
 def test_stock(
-    login_user,
+    api_auth_client,
     default_customer,
     default_product,
-    cart_client,
+    api_cart_client,
     stock_quantity,
     requested_quantity,
     expected_error,
 ):
-    login_user(default_customer.email, default_customer.password)
+    login_res = api_auth_client.login(
+        email=default_customer.email, password=default_customer.password
+    )
+    assert login_res.success is True
     product_id = default_product.productId
     stock_changer(product_id, stock_quantity)
 
     added_product = ProductToCart(
         id_product=product_id, op="up", qty=requested_quantity
     )
-    cart_res = cart_client.add_product_to_cart(added_product)
+    cart_res = api_cart_client.add_product_to_cart(added_product)
 
     errors = cart_res.psdata.errors
     if not expected_error:

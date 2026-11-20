@@ -1,5 +1,6 @@
-import pytest
 from dataclasses import dataclass
+
+import pytest
 
 
 class CustomerTestData:
@@ -68,6 +69,7 @@ class CustomerTestData:
             "A" * 10,
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="simple_repeating_letter",
         ),
@@ -75,6 +77,7 @@ class CustomerTestData:
             "K9#mX2!",
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="short",
         ),
@@ -86,6 +89,7 @@ class CustomerTestData:
             "Pineapple1!",
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="simple_dictionary_word",
         ),
@@ -93,6 +97,7 @@ class CustomerTestData:
             "         ",
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="pure_whitespace",
         ),
@@ -117,7 +122,8 @@ class CustomerTestData:
             [999],
             999,
             marks=pytest.mark.xfail(
-                reason="API allows non-existent group IDs (999), causing PHP warning in UI"
+                reason="API allows non-existent group IDs (999), causing PHP warning in UI",
+                strict=True,
             ),
             id="non_existent_group",
         ),
@@ -162,7 +168,8 @@ class LoginTestData:
     ]
 
     MISSING_PASSWORD_PAYLOADS = [
-        pytest.param({"email": "user@example.com", "password": ""}, id="empty_password"),
+        pytest.param(
+            {"email": "user@example.com", "password": ""}, id="empty_password"
+        ),
         pytest.param({"email": "user@example.com"}, id="omitted_password"),
     ]
-

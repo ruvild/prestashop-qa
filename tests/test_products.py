@@ -1,14 +1,14 @@
-from pages.base_page import BasePage
-from pages.home_page import HomePage
-from pages.category_page import CategoryPage
-from pages.product_page import ProductPage
-from playwright.sync_api import expect
-from test_data.product_test_data import HOME_ACCESSORIES
-from test_data.product_test_data import ProductTestData
-from config.utils import binshops_product_extractor
-import pytest
-from config.utils import product_url_parser
 import re
+
+import pytest
+from playwright.sync_api import expect
+
+from config.utils import binshops_product_extractor, product_url_parser
+from pages.base_page import BasePage
+from pages.category_page import CategoryPage
+from pages.home_page import HomePage
+from pages.product_page import ProductPage
+from test_data.product_test_data import HOME_ACCESSORIES, ProductTestData
 
 
 @pytest.mark.smoke
@@ -203,8 +203,9 @@ def test_product_sorting(field, sort_order, product_search_client):
 @pytest.mark.regression
 @pytest.mark.hybrid
 def test_product_color_selection(page, products_client):
-    product_page = ProductPage(page)
-    page.goto(f"{product_page.base_url}1-1-hummingbird-printed-t-shirt.html")
+    product_page = ProductPage(
+        page, endpoint="1-1-hummingbird-printed-t-shirt.html"
+    ).navigate()
 
     product_page.black_color_option.click()
     expect(page).to_have_url(re.compile(r"color-black"))

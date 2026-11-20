@@ -1,9 +1,12 @@
-from playwright.sync_api import expect
-from pages.registration_page import BasePage
-from pages.registration_page import RegistrationPage
-from factories.customer_factory import CustomerFactory
+from datetime import datetime
+
 import pytest
+from playwright.sync_api import expect
 from requests import HTTPError
+
+from factories.customer_factory import CustomerFactory
+from pages.base_page import BasePage
+from pages.registration_page import RegistrationPage
 from test_data.customer_test_data import CustomerTestData
 
 
@@ -27,6 +30,8 @@ def test_register_required_ui(page, cleanup_customer, customers_client):
     cleanup_customer(saved_customer.idCustomer)
 
     assert saved_customer.firstname == customer.first_name
+    assert saved_customer.lastname == customer.last_name
+    assert saved_customer.email == customer.email
 
 
 @pytest.mark.regression
@@ -35,6 +40,8 @@ def test_register_empty_ui(page):
     current_page = RegistrationPage(page).navigate().register_empty()
     expect(page).to_have_url(current_page.url)
     expect(current_page.email).to_be_visible()
+    expect(current_page.account_header).to_have_count(0)
+    assert current_page.first_name.evaluate("el => el.validity.valueMissing") is True
 
 
 @pytest.mark.regression
@@ -49,10 +56,21 @@ def test_register_optionals_ui(page, cleanup_customer, customers_client):
     expect(page).to_have_url(current_page.url)
     expect(current_page.account_header).to_be_visible()
 
-    saved_customer = customers_client.search_customer_by_email(customer.email)
-    cleanup_customer(saved_customer.idCustomer)
+    search_result = customers_client.search_customer_by_email(customer.email)
+    cleanup_customer(search_result.idCustomer)
 
-    assert saved_customer.firstname == customer.first_name
+    saved_customer = customers_client.get_customer(search_result.idCustomer)
+    expected_birthday = (
+        datetime.strptime(customer.birthdate, "%m/%d/%Y").date().isoformat()
+    )
+
+    assert saved_customer.firstName == customer.first_name
+    assert saved_customer.lastName == customer.last_name
+    assert saved_customer.email == customer.email
+    assert saved_customer.genderId == 1
+    assert saved_customer.birthday == expected_birthday
+    assert saved_customer.newsletterSubscribed is True
+    assert saved_customer.partnerOffersSubscribed is True
 
 
 @pytest.mark.smoke
@@ -65,6 +83,12 @@ def test_register_required_api(cleanup_customer, customers_client):
 
     saved_customer = customers_client.get_customer(customer_response.customerId)
     assert saved_customer.firstName == customer.firstName
+    assert saved_customer.lastName == customer.lastName
+    assert saved_customer.email == customer.email
+    assert saved_customer.defaultGroupId == customer.defaultGroupId
+    assert set(saved_customer.groupIds) == set(customer.groupIds)
+    assert saved_customer.enabled is True
+    assert saved_customer.guest is False
 
     response_dict = customer_response.model_dump()
     assert "password" not in response_dict
@@ -80,9 +104,40 @@ def test_register_full_api(customers_client, cleanup_customer):
 
     saved_customer = customers_client.get_customer(customer_response.customerId)
     assert saved_customer.firstName == customer.firstName
+    assert saved_customer.lastName == customer.lastName
+    assert saved_customer.email == customer.email
+    assert saved_customer.defaultGroupId == customer.defaultGroupId
+    assert set(saved_customer.groupIds) == set(customer.groupIds)
+    assert saved_customer.genderId == customer.genderId
+    assert saved_customer.partnerOffersSubscribed == customer.partnerOffersSubscribed
+    assert saved_customer.birthday == customer.birthday
+    assert saved_customer.companyName == customer.companyName
+    assert saved_customer.siretCode == customer.siretCode
+    assert saved_customer.apeCode == customer.apeCode
+    assert saved_customer.website == customer.website
+    assert saved_customer.allowedOutstandingAmount == customer.allowedOutstandingAmount
+    assert saved_customer.maxPaymentDays == customer.maxPaymentDays
+    assert saved_customer.riskId == customer.riskId
 
     response_dict = customer_response.model_dump()
     assert "password" not in response_dict
+
+
+@pytest.mark.regression
+@pytest.mark.api
+@pytest.mark.xfail(
+    reason="BUG: Admin API POST /customers ignores newsletterSubscribed (missing COMMAND_MAPPING)",
+    strict=True,
+)
+def test_register_newsletter_subscription_api(customers_client, cleanup_customer):
+    customer = CustomerFactory().create_required_api()
+    customer.newsletterSubscribed = True
+
+    customer_response = customers_client.create_customer(customer)
+    cleanup_customer(customer_response.customerId)
+
+    saved_customer = customers_client.get_customer(customer_response.customerId)
+    assert saved_customer.newsletterSubscribed is True
 
 
 @pytest.mark.regression

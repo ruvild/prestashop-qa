@@ -1,30 +1,33 @@
-from pages.login_page import LoginPage
-from playwright.sync_api import expect
-from test_data.customer_test_data import LoginTestData
 import pytest
+from playwright.sync_api import expect
+
+from pages.login_page import LoginPage
+from test_data.customer_test_data import LoginTestData
 
 
 @pytest.mark.smoke
 @pytest.mark.hybrid
-def test_valid_login_logout_ui(page, default_customer, get_account_info):
+def test_valid_login_logout_ui(page, default_customer, browser_auth_client):
     customer = default_customer
     current_page = LoginPage(page).navigate().sign_in(customer.email, customer.password)
 
     expect(page).to_have_url(current_page.url)
     expect(current_page.account_header).to_be_visible()
 
-    account = get_account_info()
+    account = browser_auth_client.get_account_info()
 
-    assert account["success"] is True
-    assert account["psdata"]["logged"] is True
-    assert account["psdata"]["email"] == customer.email
+    assert account.success is True
+    assert account.psdata is not None
+    assert account.psdata.logged is True
+    assert account.psdata.email == customer.email
 
     current_page.log_out()
     expect(current_page.sign_in_header).to_be_visible()
 
-    account = get_account_info()
-    assert account["success"] is False
-    assert "Not Authenticated" in account["message"]
+    account = browser_auth_client.get_account_info()
+    assert account.success is False
+    assert account.message is not None
+    assert "Not Authenticated" in account.message
 
 
 @pytest.mark.regression
@@ -34,7 +37,7 @@ def test_invalid_password_login_ui(page, default_customer):
     current_page = (
         LoginPage(page)
         .navigate()
-        .sign_in_with_invalid_password(customer.email, customer.password)
+        .attempt_sign_in(customer.email, f"{customer.password}_wrong")
     )
 
     expect(page).to_have_url(current_page.url)
@@ -146,9 +149,7 @@ def test_login_missing_email_api(auth_client, payload):
 @pytest.mark.api
 @pytest.mark.parametrize("invalid_email", LoginTestData.INVALID_EMAILS)
 def test_login_invalid_email_api(auth_client, invalid_email):
-    login_response = auth_client.login(
-        email=invalid_email, password="ValidPassword1!"
-    )
+    login_response = auth_client.login(email=invalid_email, password="ValidPassword1!")
 
     assert login_response.success is True
     assert login_response.code == 302
