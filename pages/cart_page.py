@@ -1,6 +1,7 @@
+from playwright.sync_api import Locator, Page
+
 from pages.base_page import BasePage
 from pages.order_page import OrderPage
-from playwright.sync_api import Locator, Page
 
 
 class CartPage(BasePage):
