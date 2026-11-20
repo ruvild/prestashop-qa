@@ -36,7 +36,7 @@ A containerized testing framework for **PrestaShop** (with the additional **Bins
 * **Hybrid Testing Strategy:** Blends fast API setup/teardown validations (using Pydantic models/schemas) with deep UI automation using the Page Object Model (POM).
 * **Parallel Execution & Cross-Browser:** Built to run tests across Chromium, Firefox, and WebKit simultaneously via `pytest-xdist`, with per-worker Admin API OAuth clients provisioned dynamically.
 * **Seeded Demo Storefront:** Catalog, category, and search tests run against PrestaShop's default seeded demo data in a fresh container, while dynamically created customers and products are cleaned up per test.
-* **Automated CI/CD:** GitHub Actions pipeline features intelligent caching for Playwright dependencies and automatic artifact capture (failure screenshots, server logs, and HTML reports). The test suite runs automatically on every push or pull request via GitHub Actions.
+* **Automated CI/CD:** GitHub Actions pipeline features a static lint/format pre-check (`ruff` + `black`), intelligent caching for Playwright dependencies, and automatic artifact capture (failure screenshots and Playwright traces, server logs, and HTML reports). The test suite runs automatically on pull requests targeting `main` and can also be triggered manually via `workflow_dispatch` in GitHub Actions.
 
 ![GitHub Actions Pipeline Run](docs/assets/ci_pipeline_steps.png)
 
@@ -83,6 +83,12 @@ git clone https://github.com/ruvild/prestashop-qa.git
 cd prestashop-qa
 
 pip install -r requirements.txt
+```
+
+Optionally install linting and formatting tools (`ruff` and `black`) for local development:
+
+```bash
+pip install -r requirements-dev.txt
 ```
 
 ## 2. Configure Environment Variables
@@ -147,6 +153,26 @@ pytest -n auto
 
 ```bash
 pytest --browser chromium
+```
+
+## Run Tests by Marker
+
+The suite defines markers in `pytest.ini` (`smoke`, `regression`, `ui`, `api`, `hybrid`):
+
+```bash
+pytest -m smoke
+pytest -m api
+pytest -m "ui or hybrid"
+pytest -m regression
+```
+
+## Linting & Formatting
+
+Check code style and formatting locally with `ruff` and `black` (configured in `pyproject.toml`):
+
+```bash
+ruff check .
+black --check .
 ```
 
 ## HTML Test Reports
