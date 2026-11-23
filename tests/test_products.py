@@ -2,6 +2,7 @@ import re
 
 import pytest
 from playwright.sync_api import expect
+from requests import HTTPError
 
 from config.utils import binshops_product_extractor, product_url_parser
 from pages.base_page import BasePage
@@ -248,3 +249,60 @@ def test_pagination_api(product_search_client):
 
     assert 0 < len(page_2_ids) <= len(page_1_ids) == results_per_page
     assert page_1_ids.isdisjoint(page_2_ids)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+def test_nonexistent_product_id_api(products_client):
+    product_id = ProductTestData.NON_EXISTENT_PRODUCT_ID
+    combination_id = ProductTestData.NON_EXISTENT_COMBINATION_ID
+
+    with pytest.raises(HTTPError) as get_exc:
+        products_client.get_product(product_id)
+    assert get_exc.value.response is not None
+    assert get_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as patch_exc:
+        products_client.update_product(product_id, {"enabled": True})
+    assert patch_exc.value.response is not None
+    assert patch_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as delete_exc:
+        products_client.delete_product(product_id)
+    assert delete_exc.value.response is not None
+    assert delete_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as comb_exc:
+        products_client.search_product_combination(combination_id)
+    assert comb_exc.value.response is not None
+    assert comb_exc.value.response.status_code == 404
+
+
+@pytest.mark.regression
+@pytest.mark.api
+@pytest.mark.xfail(
+    reason="BUG: PrestaShop Admin API returns 500 instead of 400/422 for invalid product IDs",
+    strict=True,
+)
+@pytest.mark.parametrize("product_id", ProductTestData.INVALID_PRODUCT_IDS)
+def test_invalid_product_id_api(product_id, products_client):
+    with pytest.raises(HTTPError) as exc_info:
+        products_client.get_product(product_id)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code in (400, 422)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+@pytest.mark.xfail(
+    reason="BUG: PrestaShop Admin API returns 500 instead of 400/422 for invalid combination IDs",
+    strict=True,
+)
+@pytest.mark.parametrize("combination_id", ProductTestData.INVALID_PRODUCT_IDS)
+def test_invalid_combination_id_api(combination_id, products_client):
+    with pytest.raises(HTTPError) as exc_info:
+        products_client.search_product_combination(combination_id)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code in (400, 422)

@@ -74,3 +74,10 @@ class ProductTestData:
         pytest.param(1, 1, False, id="in_stock"),
         pytest.param(1, 2, "adjust the quantity", id="more_than_stock"),
     ]
+
+    NON_EXISTENT_PRODUCT_ID = 99999999
+    NON_EXISTENT_COMBINATION_ID = 99999999
+    INVALID_PRODUCT_IDS = [
+        pytest.param(0, id="zero"),
+        pytest.param(-1, id="negative"),
+    ]
