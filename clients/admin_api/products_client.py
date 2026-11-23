@@ -75,7 +75,7 @@ class ProductsClient(BaseClient):
             if product["category"] == category.name
         }
 
-    def search_product_combination(self, combination_id: str) -> dict:
+    def search_product_combination(self, combination_id: int) -> dict:
         url = self.build_url(f"{self.endpoint}/combinations/{combination_id}")
         res = self.session.get(url, headers=self.auth_header, timeout=self.timeout)
         res.raise_for_status()

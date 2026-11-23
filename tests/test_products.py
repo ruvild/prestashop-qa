@@ -219,7 +219,8 @@ def test_product_color_selection(page, products_client):
 
     expect(product_page.size_dropdown).to_have_value(size_id)
 
-    combination_id: str = product_url_data["combination_id"]
+    combination_id: int | None = product_url_data["combination_id"]
+    assert combination_id is not None, "Combination ID missing from product URL"
     product_api_data = products_client.search_product_combination(combination_id)
 
     assert product_url_data["product_id"] == product_api_data["productId"]
