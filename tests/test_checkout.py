@@ -6,7 +6,10 @@ from playwright.sync_api import expect
 from config.utils import get_order_id_from_url, stock_changer
 from pages.cart_page import CartPage
 from pages.home_page import HomePage
-from test_data.customer_test_data import DEFAULT_ADDRESS_DATA
+from test_data.customer_test_data import (
+    DEFAULT_ADDRESS_DATA,
+    INVALID_POSTCODE_ADDRESS_DATA,
+)
 from test_data.product_test_data import (
     ADD_PRODUCT_TO_CART,
     ProductTestData,
@@ -61,6 +64,66 @@ def test_cart_behavior(page, cart_client):
     )
 
     assert matching_products[0].cart_quantity == int(cart_quantity)
+
+
+@pytest.mark.regression
+@pytest.mark.hybrid
+def test_cart_quantity_update(page, default_customer, browser_auth_client, cart_client):
+    login_res = browser_auth_client.login(
+        email=default_customer.email, password=default_customer.password
+    )
+    assert login_res.success is True
+
+    cart_res = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
+    assert cart_res.success is True
+
+    product_id = ADD_PRODUCT_TO_CART.id_product
+    product_attribute_id = ADD_PRODUCT_TO_CART.id_product_attribute
+    assert product_attribute_id is not None
+
+    cart_page = CartPage(page).navigate()
+    qty_input = cart_page.get_quantity_input(product_id, product_attribute_id)
+    expect(qty_input).to_have_value(str(ADD_PRODUCT_TO_CART.qty))
+
+    increased_qty = ADD_PRODUCT_TO_CART.qty + 1
+    cart_page.increase_product_quantity(product_id, product_attribute_id)
+    expect(qty_input).to_have_value(str(increased_qty))
+    expect(cart_page.cart_summary).to_contain_text(f"{increased_qty} items")
+
+    updated_cart = cart_client.get_cart_contents()
+    assert updated_cart.psdata.products[0].cart_quantity == increased_qty
+
+    cart_page.decrease_product_quantity(product_id, product_attribute_id)
+    expect(qty_input).to_have_value(str(ADD_PRODUCT_TO_CART.qty))
+    expect(cart_page.cart_summary).to_contain_text(f"{ADD_PRODUCT_TO_CART.qty} items")
+
+    reverted_cart = cart_client.get_cart_contents()
+    assert reverted_cart.psdata.products[0].cart_quantity == ADD_PRODUCT_TO_CART.qty
+
+
+@pytest.mark.regression
+@pytest.mark.hybrid
+def test_remove_cart_item(page, default_customer, browser_auth_client, cart_client):
+    login_res = browser_auth_client.login(
+        email=default_customer.email, password=default_customer.password
+    )
+    assert login_res.success is True
+
+    cart_res = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
+    assert cart_res.success is True
+
+    product_id = ADD_PRODUCT_TO_CART.id_product
+    product_attribute_id = ADD_PRODUCT_TO_CART.id_product_attribute
+    assert product_attribute_id is not None
+
+    cart_page = CartPage(page).navigate()
+    cart_page.remove_product(product_id, product_attribute_id)
+
+    expect(cart_page.get_product(product_id, product_attribute_id)).to_have_count(0)
+    expect(cart_page.empty_cart_message).to_be_visible()
+
+    updated_cart = cart_client.get_cart_contents()
+    assert updated_cart.psdata.products == []
 
 
 @pytest.mark.smoke
@@ -137,6 +200,80 @@ def test_full_checkout(
         order_data.totals.total_including_tax.value
         == confirmation_page.total_value.inner_text()
     )
+
+
+@pytest.mark.regression
+@pytest.mark.ui
+def test_checkout_invalid_postcode_ui(
+    page, default_customer, browser_auth_client, cart_client
+):
+    login_res = browser_auth_client.login(
+        email=default_customer.email, password=default_customer.password
+    )
+    assert login_res.success is True
+
+    cart_res = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
+    assert cart_res.success is True
+
+    order_page = (
+        CartPage(page)
+        .navigate()
+        .proceed_to_checkout()
+        .insert_address(INVALID_POSTCODE_ADDRESS_DATA)
+    )
+
+    expect(page).to_have_url(re.compile(rf"^{re.escape(order_page.url)}"))
+    expect(order_page.address_error_alert).to_be_visible()
+    expect(order_page.address_error_alert).to_contain_text("Invalid postcode")
+    expect(order_page.default_delivery_option).to_be_hidden()
+
+
+@pytest.mark.regression
+@pytest.mark.ui
+def test_checkout_empty_address_ui(
+    page, default_customer, browser_auth_client, cart_client
+):
+    login_res = browser_auth_client.login(
+        email=default_customer.email, password=default_customer.password
+    )
+    assert login_res.success is True
+
+    cart_res = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
+    assert cart_res.success is True
+
+    order_page = CartPage(page).navigate().proceed_to_checkout()
+    order_page.go_to_shipping_button.click()
+
+    expect(page).to_have_url(order_page.url)
+    assert order_page.address.evaluate("el => el.validity.valueMissing") is True
+    expect(order_page.default_delivery_option).to_be_hidden()
+
+
+@pytest.mark.regression
+@pytest.mark.ui
+def test_checkout_unchecked_tos_ui(
+    page, default_customer, browser_auth_client, cart_client
+):
+    login_res = browser_auth_client.login(
+        email=default_customer.email, password=default_customer.password
+    )
+    assert login_res.success is True
+
+    cart_res = cart_client.add_product_to_cart(ADD_PRODUCT_TO_CART)
+    assert cart_res.success is True
+
+    order_page = (
+        CartPage(page)
+        .navigate()
+        .proceed_to_checkout()
+        .insert_address(DEFAULT_ADDRESS_DATA)
+        .proceed_to_payment()
+    )
+    order_page.wire_payment_option.check()
+
+    expect(order_page.tos_agreement).not_to_be_checked()
+    expect(order_page.place_order_button).to_be_disabled()
+    expect(page).to_have_url(order_page.url)
 
 
 @pytest.mark.regression

@@ -143,6 +143,10 @@ DEFAULT_ADDRESS_DATA = AddressData(
     "2685 California St", "Mountain View", "California", "94040", "United States"
 )
 
+INVALID_POSTCODE_ADDRESS_DATA = AddressData(
+    "2685 California St", "Mountain View", "California", "INVALID", "United States"
+)
+
 
 class LoginTestData:
     SENSITIVE_USER_FIELDS = {

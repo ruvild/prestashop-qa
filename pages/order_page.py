@@ -18,6 +18,7 @@ class OrderPage(BasePage):
         self.country = page.get_by_label("Country")
         self.state = page.get_by_label("State")
         self.go_to_shipping_button = page.get_by_role("button", name="Continue")
+        self.address_error_alert = page.get_by_role("alert")
 
         self.default_delivery_option = page.get_by_role("radio", name="My carrier")
         self.go_to_payment_button = page.get_by_role("button", name="Payment")
