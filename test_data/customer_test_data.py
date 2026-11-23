@@ -129,6 +129,12 @@ class CustomerTestData:
         ),
     ]
 
+    NON_EXISTENT_CUSTOMER_ID = 99999999
+    INVALID_CUSTOMER_IDS = [
+        pytest.param(0, 422, id="zero"),
+        pytest.param(-1, 405, id="negative"),
+    ]
+
 
 @dataclass(frozen=True)
 class AddressData:

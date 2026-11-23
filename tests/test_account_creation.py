@@ -73,6 +73,36 @@ def test_register_optionals_ui(page, cleanup_customer, customers_client):
     assert saved_customer.partnerOffersSubscribed is True
 
 
+@pytest.mark.regression
+@pytest.mark.ui
+def test_register_duplicate_email_ui(page, default_customer):
+    customer = CustomerFactory.create_required_ui()
+    customer.email = default_customer.email
+
+    current_page = RegistrationPage(page).navigate().attempt_register(customer)
+
+    expect(page).to_have_url(current_page.url)
+    expect(current_page.error_alert).to_be_visible()
+    expect(current_page.error_alert).to_contain_text("already used")
+    expect(current_page.account_header).to_have_count(0)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+def test_register_duplicate_email_api(
+    default_customer, cleanup_customer, customers_client
+):
+    customer = CustomerFactory().create_required_api()
+    customer.email = default_customer.email
+
+    with pytest.raises(HTTPError) as exc_info:
+        customer_response = customers_client.create_customer(customer)
+        cleanup_customer(customer_response.customerId)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
+
+
 @pytest.mark.smoke
 @pytest.mark.api
 def test_register_required_api(cleanup_customer, customers_client):
@@ -246,3 +276,37 @@ def test_register_invalid_groups(
 
     assert exc_info.value.response is not None
     assert exc_info.value.response.status_code in (400, 422)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+def test_nonexistent_customer_id_api(customers_client):
+    customer_id = CustomerTestData.NON_EXISTENT_CUSTOMER_ID
+
+    with pytest.raises(HTTPError) as get_exc:
+        customers_client.get_customer(customer_id)
+    assert get_exc.value.response is not None
+    assert get_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as patch_exc:
+        customers_client.update_customer(customer_id, {"enabled": False})
+    assert patch_exc.value.response is not None
+    assert patch_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as delete_exc:
+        customers_client.delete_customer(customer_id)
+    assert delete_exc.value.response is not None
+    assert delete_exc.value.response.status_code == 404
+
+
+@pytest.mark.regression
+@pytest.mark.api
+@pytest.mark.parametrize(
+    "customer_id, expected_status", CustomerTestData.INVALID_CUSTOMER_IDS
+)
+def test_invalid_customer_id_api(customer_id, expected_status, customers_client):
+    with pytest.raises(HTTPError) as exc_info:
+        customers_client.get_customer(customer_id)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == expected_status

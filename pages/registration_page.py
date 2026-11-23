@@ -23,10 +23,11 @@ class RegistrationPage(BasePage):
         self.terms_and_conditions = self.page.locator("#field-psgdpr")
         self.newsletter = self.page.locator("#field-newsletter")
         self.create_account = self.page.get_by_role("button", name="Create account")
+        self.error_alert = self.page.get_by_role("alert")
 
-    def register_valid(
+    def _fill_and_submit(
         self, customer: CustomerRegistrationUI, optionals: bool = False
-    ) -> BasePage:
+    ) -> None:
         self.first_name.fill(customer.first_name)
         self.last_name.fill(customer.last_name)
         self.email.fill(customer.email)
@@ -41,7 +42,18 @@ class RegistrationPage(BasePage):
             self.newsletter.check()
 
         self.create_account.click()
+
+    def register_valid(
+        self, customer: CustomerRegistrationUI, optionals: bool = False
+    ) -> BasePage:
+        self._fill_and_submit(customer, optionals=optionals)
         return BasePage(self.page)
+
+    def attempt_register(
+        self, customer: CustomerRegistrationUI, optionals: bool = False
+    ) -> Self:
+        self._fill_and_submit(customer, optionals=optionals)
+        return self
 
     def register_empty(self) -> Self:
         self.create_account.click()
