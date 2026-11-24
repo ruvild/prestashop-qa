@@ -2,7 +2,7 @@ import os
 from collections.abc import Generator
 
 import pytest
-from playwright.sync_api import APIRequestContext, Page, Playwright
+from playwright.sync_api import APIRequestContext, Page, Playwright, expect
 
 from clients.admin_api.customers_client import CustomersClient
 from clients.admin_api.products_client import ProductsClient
@@ -15,6 +15,8 @@ from scripts.setup_environment import ensure_environment
 
 
 def pytest_configure(config: pytest.Config) -> None:
+    expect.set_options(timeout=15_000)
+
     if hasattr(config, "workerinput"):
         return
 

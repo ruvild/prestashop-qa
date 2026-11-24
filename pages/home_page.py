@@ -44,7 +44,7 @@ class HomePage(BasePage):
         return self.quick_view_dialog
 
     def navigate_to_product_page(self, product_locator: Locator) -> ProductPage:
-        product_locator.click()
+        product_locator.locator(".product-miniature__title").click()
         return ProductPage(self.page)
 
     def navigate_to_product_page_via_quick_view(self) -> ProductPage:
