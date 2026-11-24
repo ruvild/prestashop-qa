@@ -16,7 +16,7 @@ from schemas.product_schemas import ProductResponse
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture()
+@pytest.fixture
 def cleanup_customer(
     customers_client: CustomersClient,
 ) -> Generator[Callable[[int], None]]:
@@ -31,11 +31,11 @@ def cleanup_customer(
         _delete_customer(customers_client, customer_id)
 
 
-@pytest.fixture()
+@pytest.fixture
 def default_customer(
     customers_client: CustomersClient,
 ) -> Generator[CustomerCreateRequest]:
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     response = customers_client.create_customer(customer)
 
     yield customer

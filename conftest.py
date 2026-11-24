@@ -23,6 +23,11 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 @pytest.fixture(scope="session")
+def browser_context_args(browser_context_args: dict) -> dict:
+    return {**browser_context_args, "reduced_motion": "reduce"}
+
+
+@pytest.fixture(scope="session")
 def auth_key(worker_id: str) -> Generator[str]:
 
     provisioner = ApiClientSetup(worker_id)
@@ -33,27 +38,27 @@ def auth_key(worker_id: str) -> Generator[str]:
     provisioner.teardown()
 
 
-@pytest.fixture()
+@pytest.fixture
 def customers_client(auth_key: str) -> CustomersClient:
     return CustomersClient(auth_key)
 
 
-@pytest.fixture()
+@pytest.fixture
 def products_client(auth_key: str) -> ProductsClient:
     return ProductsClient(auth_key)
 
 
-@pytest.fixture()
+@pytest.fixture
 def auth_client() -> AuthClient:
     return AuthClient()
 
 
-@pytest.fixture()
+@pytest.fixture
 def browser_auth_client(page: Page) -> AuthClient:
     return AuthClient(page.request)
 
 
-@pytest.fixture()
+@pytest.fixture
 def api_request_context(
     playwright: Playwright,
 ) -> Generator[APIRequestContext]:
@@ -62,26 +67,26 @@ def api_request_context(
     context.dispose()
 
 
-@pytest.fixture()
+@pytest.fixture
 def api_auth_client(api_request_context: APIRequestContext) -> AuthClient:
     return AuthClient(api_request_context)
 
 
-@pytest.fixture()
+@pytest.fixture
 def api_cart_client(api_request_context: APIRequestContext) -> CartClient:
     return CartClient(api_request_context)
 
 
-@pytest.fixture()
+@pytest.fixture
 def product_search_client() -> ProductSearchClient:
     return ProductSearchClient()
 
 
-@pytest.fixture()
+@pytest.fixture
 def category_products_client() -> CategoryProductsClient:
     return CategoryProductsClient()
 
 
-@pytest.fixture()
+@pytest.fixture
 def cart_client(page: Page) -> CartClient:
     return CartClient(page.request)

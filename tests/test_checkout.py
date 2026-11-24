@@ -39,8 +39,8 @@ def test_cart_behavior(page, cart_client):
     product_block = cart_page.get_product(product_id, product_attribute_id)
     expect(product_block).to_have_count(1)
 
-    cart_quantity = product_block.locator(
-        'input[name="product-quantity-spin"]'
+    cart_quantity = cart_page.get_quantity_input(
+        product_id, product_attribute_id
     ).input_value()
 
     assert int(product_quantity) == int(cart_quantity)

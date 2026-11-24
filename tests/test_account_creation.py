@@ -92,7 +92,7 @@ def test_register_duplicate_email_ui(page, default_customer):
 def test_register_duplicate_email_api(
     default_customer, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.email = default_customer.email
 
     with pytest.raises(HTTPError) as exc_info:
@@ -106,7 +106,7 @@ def test_register_duplicate_email_api(
 @pytest.mark.smoke
 @pytest.mark.api
 def test_register_required_api(cleanup_customer, customers_client):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
 
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
@@ -127,7 +127,7 @@ def test_register_required_api(cleanup_customer, customers_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_register_full_api(customers_client, cleanup_customer):
-    customer = CustomerFactory().create_full_api()
+    customer = CustomerFactory.create_full_api()
 
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
@@ -150,7 +150,7 @@ def test_register_full_api(customers_client, cleanup_customer):
 def test_register_valid_name_fields(
     field_name, valid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
 
     setattr(customer, field_name, valid_value)
     customer_response = customers_client.create_customer(customer)
@@ -168,7 +168,7 @@ def test_register_valid_name_fields(
 def test_register_invalid_name_fields(
     field_name, invalid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
 
     setattr(customer, field_name, invalid_value)
 
@@ -184,7 +184,7 @@ def test_register_invalid_name_fields(
 @pytest.mark.api
 @pytest.mark.parametrize("valid_value", CustomerTestData.VALID_EMAILS)
 def test_register_valid_email_field(valid_value, cleanup_customer, customers_client):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.email = valid_value
 
     customer_response = customers_client.create_customer(customer)
@@ -200,7 +200,7 @@ def test_register_valid_email_field(valid_value, cleanup_customer, customers_cli
 def test_register_invalid_email_field(
     invalid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.email = invalid_value
 
     with pytest.raises(HTTPError) as exc_info:
@@ -215,7 +215,7 @@ def test_register_invalid_email_field(
 @pytest.mark.api
 @pytest.mark.parametrize("valid_value", CustomerTestData.VALID_PASSWORDS)
 def test_register_valid_password_field(valid_value, cleanup_customer, customers_client):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.password = valid_value
 
     customer_response = customers_client.create_customer(customer)
@@ -231,7 +231,7 @@ def test_register_valid_password_field(valid_value, cleanup_customer, customers_
 def test_register_invalid_password_field(
     invalid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.password = invalid_value
 
     with pytest.raises(HTTPError) as exc_info:
@@ -248,7 +248,7 @@ def test_register_invalid_password_field(
 def test_register_valid_groups(
     groups, default_group, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.groupIds = groups
     customer.defaultGroupId = default_group
 
@@ -266,7 +266,7 @@ def test_register_valid_groups(
 def test_register_invalid_groups(
     groups, default_group, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.groupIds = groups
     customer.defaultGroupId = default_group
 
