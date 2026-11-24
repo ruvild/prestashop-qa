@@ -8,8 +8,8 @@ from config.utils import get_env, url_joiner
 from test_data.product_test_data import ACCESSORIES, TestCategory
 
 if TYPE_CHECKING:
-    from pages.category_page import CategoryPage
     from pages.login_page import LoginPage
+    from pages.product_listing_page import ProductListingPage
 
 
 class BasePage:
@@ -81,8 +81,8 @@ class BasePage:
         self,
         category: TestCategory = ACCESSORIES,
         subcategory: TestCategory | None = None,
-    ) -> CategoryPage:
-        from pages.category_page import CategoryPage
+    ) -> ProductListingPage:
+        from pages.product_listing_page import ProductListingPage
 
         top_menu = self.top_menu.get_by_role(
             "link", name=f"{category.name}", exact=True
@@ -95,4 +95,4 @@ class BasePage:
             ).click()
         else:
             top_menu.click()
-        return CategoryPage(self.page)
+        return ProductListingPage(self.page)

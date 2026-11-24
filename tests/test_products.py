@@ -6,8 +6,8 @@ from requests import HTTPError
 
 from config.utils import binshops_product_extractor, product_url_parser
 from pages.base_page import BasePage
-from pages.category_page import CategoryPage
 from pages.home_page import HomePage
+from pages.product_listing_page import ProductListingPage
 from pages.product_page import ProductPage
 from test_data.product_test_data import HOME_ACCESSORIES, ProductTestData
 
@@ -48,25 +48,27 @@ def test_product_quick_view(page):
 @pytest.mark.smoke
 @pytest.mark.hybrid
 def test_new_product(page, default_product):
+    home_page = HomePage(page).navigate()
+    expect(home_page.latest_arrivals_block).to_be_visible()
 
-    current_page = HomePage(page).navigate()
-    new_product_banner = current_page.get_product_from_new_arrivals(
-        default_product.productId
-    )
-    expect(new_product_banner).to_be_visible()
+    new_products_page = home_page.navigate_to_new_products()
+    expect(page).to_have_url(new_products_page.url)
+    expect(
+        new_products_page.get_product_card(default_product.productId)
+    ).to_be_visible()
 
 
 @pytest.mark.smoke
 @pytest.mark.hybrid
 def test_out_of_stock_product_ui(page, default_product):
-    home_page = HomePage(page).navigate()
-    product_card = home_page.get_product_from_new_arrivals(default_product.productId)
+    product_slug = re.sub(
+        r"[^a-z0-9]+", "-", default_product.names["en-US"].lower()
+    ).strip("-")
+    product_page = ProductPage(
+        page, endpoint=f"{default_product.productId}-{product_slug}.html"
+    ).navigate()
 
-    expect(product_card).to_be_visible()
-    expect(home_page.get_add_to_cart_button(product_card)).to_have_count(0)
-
-    product_page = home_page.navigate_to_product_page(product_card)
-
+    expect(product_page.product_title).to_have_text(default_product.names["en-US"])
     expect(product_page.add_to_cart_button).to_be_visible()
     expect(product_page.add_to_cart_button).to_be_disabled()
 
@@ -88,12 +90,10 @@ def test_filters_ui(page, category_products_client, subcategory=HOME_ACCESSORIES
     response = category_products_client.search_category_products(subcategory)
     filtered_products_ids_api = set(binshops_product_extractor("id_product", response))
 
-    category_page = CategoryPage(page)
-    expect(category_page.filtered_products).to_have_count(
-        len(filtered_products_ids_api)
-    )
+    listing_page = ProductListingPage(page)
+    expect(listing_page.filtered_products).to_have_count(len(filtered_products_ids_api))
 
-    filtered_products_ids_ui = category_page.get_filtered_products_ids()
+    filtered_products_ids_ui = listing_page.get_filtered_products_ids()
 
     assert filtered_products_ids_ui == filtered_products_ids_api
 
