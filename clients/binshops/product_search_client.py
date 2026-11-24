@@ -1,5 +1,5 @@
 from clients.binshops.base_client import BaseClient
-from typing import Any
+from schemas.product_schemas import BinshopsProductListResponse
 
 
 class ProductSearchClient(BaseClient):
@@ -13,7 +13,7 @@ class ProductSearchClient(BaseClient):
         results_per_page: int | None = None,
         page: int | None = None,
         query: str = "hummingbird",
-    ) -> dict[str, Any]:
+    ) -> BinshopsProductListResponse:
 
         params = {
             "s": query,
@@ -25,6 +25,6 @@ class ProductSearchClient(BaseClient):
         params = {key: value for key, value in params.items() if value is not None}
 
         url = self.build_url(self.endpoint)
-        res = self.session.get(url, params=params)
+        res = self.session.get(url, params=params, timeout=self.timeout)
         res.raise_for_status()
-        return res.json()
+        return BinshopsProductListResponse.model_validate(res.json())

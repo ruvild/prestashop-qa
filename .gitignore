@@ -2,6 +2,8 @@ __pycache__/
 .venv
 .env
 reports
+test-results/
+screenshots/
 binshopsrest/
 .vscode/
 .pytest_cache/

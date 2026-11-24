@@ -1,11 +1,13 @@
-from playwright.sync_api import expect
-from pages.registration_page import BasePage
-from pages.registration_page import RegistrationPage
-from factories.customer_factory import CustomerFactory
+from datetime import datetime
+
 import pytest
+from playwright.sync_api import expect
 from requests import HTTPError
+
+from factories.customer_factory import CustomerFactory
+from pages.base_page import BasePage
+from pages.registration_page import RegistrationPage
 from test_data.customer_test_data import CustomerTestData
-import os
 
 
 @pytest.mark.smoke
@@ -28,6 +30,8 @@ def test_register_required_ui(page, cleanup_customer, customers_client):
     cleanup_customer(saved_customer.idCustomer)
 
     assert saved_customer.firstname == customer.first_name
+    assert saved_customer.lastname == customer.last_name
+    assert saved_customer.email == customer.email
 
 
 @pytest.mark.regression
@@ -36,6 +40,8 @@ def test_register_empty_ui(page):
     current_page = RegistrationPage(page).navigate().register_empty()
     expect(page).to_have_url(current_page.url)
     expect(current_page.email).to_be_visible()
+    expect(current_page.account_header).to_have_count(0)
+    assert current_page.first_name.evaluate("el => el.validity.valueMissing") is True
 
 
 @pytest.mark.regression
@@ -50,22 +56,69 @@ def test_register_optionals_ui(page, cleanup_customer, customers_client):
     expect(page).to_have_url(current_page.url)
     expect(current_page.account_header).to_be_visible()
 
-    saved_customer = customers_client.search_customer_by_email(customer.email)
-    cleanup_customer(saved_customer.idCustomer)
+    search_result = customers_client.search_customer_by_email(customer.email)
+    cleanup_customer(search_result.idCustomer)
 
-    assert saved_customer.firstname == customer.first_name
+    saved_customer = customers_client.get_customer(search_result.idCustomer)
+    expected_birthday = (
+        datetime.strptime(customer.birthdate, "%m/%d/%Y").date().isoformat()
+    )
+
+    assert saved_customer.firstName == customer.first_name
+    assert saved_customer.lastName == customer.last_name
+    assert saved_customer.email == customer.email
+    assert saved_customer.genderId == 1
+    assert saved_customer.birthday == expected_birthday
+    assert saved_customer.newsletterSubscribed is True
+    assert saved_customer.partnerOffersSubscribed is True
+
+
+@pytest.mark.regression
+@pytest.mark.ui
+def test_register_duplicate_email_ui(page, default_customer):
+    customer = CustomerFactory.create_required_ui()
+    customer.email = default_customer.email
+
+    current_page = RegistrationPage(page).navigate().attempt_register(customer)
+
+    expect(page).to_have_url(current_page.url)
+    expect(current_page.error_alert).to_be_visible()
+    expect(current_page.error_alert).to_contain_text("already used")
+    expect(current_page.account_header).to_have_count(0)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+def test_register_duplicate_email_api(
+    default_customer, cleanup_customer, customers_client
+):
+    customer = CustomerFactory.create_required_api()
+    customer.email = default_customer.email
+
+    with pytest.raises(HTTPError) as exc_info:
+        customer_response = customers_client.create_customer(customer)
+        cleanup_customer(customer_response.customerId)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
 
 
 @pytest.mark.smoke
 @pytest.mark.api
 def test_register_required_api(cleanup_customer, customers_client):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
 
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
     saved_customer = customers_client.get_customer(customer_response.customerId)
-    assert saved_customer.firstName == customer.firstName
+    expected = customer.model_dump(exclude={"password", "groupIds"}, exclude_none=True)
+    actual = saved_customer.model_dump(include=expected.keys())
+
+    assert actual == expected
+    assert set(saved_customer.groupIds) == set(customer.groupIds)
+    assert saved_customer.enabled is True
+    assert saved_customer.guest is False
 
     response_dict = customer_response.model_dump()
     assert "password" not in response_dict
@@ -74,13 +127,17 @@ def test_register_required_api(cleanup_customer, customers_client):
 @pytest.mark.regression
 @pytest.mark.api
 def test_register_full_api(customers_client, cleanup_customer):
-    customer = CustomerFactory().create_full_api()
+    customer = CustomerFactory.create_full_api()
 
     customer_response = customers_client.create_customer(customer)
     cleanup_customer(customer_response.customerId)
 
     saved_customer = customers_client.get_customer(customer_response.customerId)
-    assert saved_customer.firstName == customer.firstName
+    expected = customer.model_dump(exclude={"password", "groupIds"}, exclude_none=True)
+    actual = saved_customer.model_dump(include=expected.keys())
+
+    assert actual == expected
+    assert set(saved_customer.groupIds) == set(customer.groupIds)
 
     response_dict = customer_response.model_dump()
     assert "password" not in response_dict
@@ -93,7 +150,7 @@ def test_register_full_api(customers_client, cleanup_customer):
 def test_register_valid_name_fields(
     field_name, valid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
 
     setattr(customer, field_name, valid_value)
     customer_response = customers_client.create_customer(customer)
@@ -111,23 +168,23 @@ def test_register_valid_name_fields(
 def test_register_invalid_name_fields(
     field_name, invalid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
 
     setattr(customer, field_name, invalid_value)
 
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert "Unprocessable Content" in str(exc_info.value)
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
 
 
 @pytest.mark.regression
 @pytest.mark.api
 @pytest.mark.parametrize("valid_value", CustomerTestData.VALID_EMAILS)
 def test_register_valid_email_field(valid_value, cleanup_customer, customers_client):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.email = valid_value
 
     customer_response = customers_client.create_customer(customer)
@@ -143,22 +200,22 @@ def test_register_valid_email_field(valid_value, cleanup_customer, customers_cli
 def test_register_invalid_email_field(
     invalid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.email = invalid_value
 
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert "Unprocessable Content" in str(exc_info.value)
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
 
 
 @pytest.mark.regression
 @pytest.mark.api
 @pytest.mark.parametrize("valid_value", CustomerTestData.VALID_PASSWORDS)
 def test_register_valid_password_field(valid_value, cleanup_customer, customers_client):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.password = valid_value
 
     customer_response = customers_client.create_customer(customer)
@@ -174,15 +231,15 @@ def test_register_valid_password_field(valid_value, cleanup_customer, customers_
 def test_register_invalid_password_field(
     invalid_value, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.password = invalid_value
 
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert "Unprocessable Content" in str(exc_info.value)
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == 422
 
 
 @pytest.mark.regression
@@ -191,7 +248,7 @@ def test_register_invalid_password_field(
 def test_register_valid_groups(
     groups, default_group, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.groupIds = groups
     customer.defaultGroupId = default_group
 
@@ -209,15 +266,47 @@ def test_register_valid_groups(
 def test_register_invalid_groups(
     groups, default_group, cleanup_customer, customers_client
 ):
-    customer = CustomerFactory().create_required_api()
+    customer = CustomerFactory.create_required_api()
     customer.groupIds = groups
     customer.defaultGroupId = default_group
 
     with pytest.raises(HTTPError) as exc_info:
         customer_response = customers_client.create_customer(customer)
         cleanup_customer(customer_response.customerId)
-    print(exc_info)
 
-    assert ("Unprocessable Content" in str(exc_info.value)) or (
-        "Bad Request" in str(exc_info.value)
-    )
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code in (400, 422)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+def test_nonexistent_customer_id_api(customers_client):
+    customer_id = CustomerTestData.NON_EXISTENT_CUSTOMER_ID
+
+    with pytest.raises(HTTPError) as get_exc:
+        customers_client.get_customer(customer_id)
+    assert get_exc.value.response is not None
+    assert get_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as patch_exc:
+        customers_client.update_customer(customer_id, {"enabled": False})
+    assert patch_exc.value.response is not None
+    assert patch_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as delete_exc:
+        customers_client.delete_customer(customer_id)
+    assert delete_exc.value.response is not None
+    assert delete_exc.value.response.status_code == 404
+
+
+@pytest.mark.regression
+@pytest.mark.api
+@pytest.mark.parametrize(
+    "customer_id, expected_status", CustomerTestData.INVALID_CUSTOMER_IDS
+)
+def test_invalid_customer_id_api(customer_id, expected_status, customers_client):
+    with pytest.raises(HTTPError) as exc_info:
+        customers_client.get_customer(customer_id)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code == expected_status

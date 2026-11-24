@@ -1,5 +1,6 @@
-import pytest
 from dataclasses import dataclass
+
+import pytest
 
 
 class CustomerTestData:
@@ -68,6 +69,7 @@ class CustomerTestData:
             "A" * 10,
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="simple_repeating_letter",
         ),
@@ -75,6 +77,7 @@ class CustomerTestData:
             "K9#mX2!",
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="short",
         ),
@@ -86,6 +89,7 @@ class CustomerTestData:
             "Pineapple1!",
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="simple_dictionary_word",
         ),
@@ -93,6 +97,7 @@ class CustomerTestData:
             "         ",
             marks=pytest.mark.xfail(
                 reason="BUG: API ignores password complexity/length rules enforced by UI",
+                strict=True,
             ),
             id="pure_whitespace",
         ),
@@ -117,10 +122,17 @@ class CustomerTestData:
             [999],
             999,
             marks=pytest.mark.xfail(
-                reason="API allows non-existent group IDs (999), causing PHP warning in UI"
+                reason="API allows non-existent group IDs (999), causing PHP warning in UI",
+                strict=True,
             ),
             id="non_existent_group",
         ),
+    ]
+
+    NON_EXISTENT_CUSTOMER_ID = 99999999
+    INVALID_CUSTOMER_IDS = [
+        pytest.param(0, 422, id="zero"),
+        pytest.param(-1, 405, id="negative"),
     ]
 
 
@@ -136,3 +148,38 @@ class AddressData:
 DEFAULT_ADDRESS_DATA = AddressData(
     "2685 California St", "Mountain View", "California", "94040", "United States"
 )
+
+INVALID_POSTCODE_ADDRESS_DATA = AddressData(
+    "2685 California St", "Mountain View", "California", "INVALID", "United States"
+)
+
+
+class LoginTestData:
+    SENSITIVE_USER_FIELDS = {
+        "passwd",
+        "secure_key",
+        "last_passwd_gen",
+        "reset_password_token",
+        "reset_password_validity",
+    }
+
+    MISSING_EMAIL_PAYLOADS = [
+        pytest.param({"email": "", "password": "ValidPassword1!"}, id="empty_email"),
+        pytest.param({"password": "ValidPassword1!"}, id="omitted_email"),
+        pytest.param({}, id="empty_payload"),
+    ]
+
+    INVALID_EMAILS = [
+        pytest.param("not-an-email", id="no_at_symbol"),
+        pytest.param("user@", id="missing_domain"),
+        pytest.param("@example.com", id="missing_local"),
+        pytest.param("user @example.com", id="whitespace"),
+        pytest.param("user@example", id="missing_tld"),
+    ]
+
+    MISSING_PASSWORD_PAYLOADS = [
+        pytest.param(
+            {"email": "user@example.com", "password": ""}, id="empty_password"
+        ),
+        pytest.param({"email": "user@example.com"}, id="omitted_password"),
+    ]

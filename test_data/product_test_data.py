@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from pydantic import BaseModel
-from typing import Literal
+
 import pytest
+
+from schemas.cart_schemas import ProductToCart
 
 
 @dataclass(frozen=True)
@@ -13,15 +14,6 @@ class TestCategory:
 ACCESSORIES = TestCategory("Accessories", 6)
 STATIONERY = TestCategory("Stationery", 7)
 HOME_ACCESSORIES = TestCategory("Home Accessories", 8)
-
-
-class ProductToCart(BaseModel):
-    update: Literal[1] = 1
-    id_product: int
-    id_product_attribute: int | None = None
-    op: Literal["up", "down"]
-    action: Literal["update"] = "update"
-    qty: int
 
 
 ADD_PRODUCT_TO_CART = ProductToCart(
@@ -72,4 +64,11 @@ class ProductTestData:
         pytest.param(0, 1, "no longer available", id="out_of_stock"),
         pytest.param(1, 1, False, id="in_stock"),
         pytest.param(1, 2, "adjust the quantity", id="more_than_stock"),
+    ]
+
+    NON_EXISTENT_PRODUCT_ID = 99999999
+    NON_EXISTENT_COMBINATION_ID = 99999999
+    INVALID_PRODUCT_IDS = [
+        pytest.param(0, id="zero"),
+        pytest.param(-1, id="negative"),
     ]

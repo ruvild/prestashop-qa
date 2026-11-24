@@ -1,18 +1,26 @@
+import logging
+from collections.abc import Callable, Generator
+
 import pytest
-from typing import Any
+from playwright.sync_api import Page
+
+from clients.admin_api.customers_client import CustomersClient
+from clients.admin_api.products_client import ProductsClient
 from clients.binshops.base_client import BaseClient
-from collections.abc import Generator, Callable
 from factories.customer_factory import CustomerFactory
-from schemas.customer_schemas import CustomerCreateRequest
 from factories.product_factory import ProductFactory
-from schemas.product_schemas import ProductResponse
-from playwright.sync_api import APIResponse
+from schemas.customer_schemas import CustomerCreateRequest
 from schemas.order_schemas import OrderResponse
+from schemas.product_schemas import ProductResponse
+
+logger = logging.getLogger(__name__)
 
 
-@pytest.fixture()
-def cleanup_customer(customers_client) -> Generator[Callable[[int], None], None, None]:
-    created_ids = []
+@pytest.fixture
+def cleanup_customer(
+    customers_client: CustomersClient,
+) -> Generator[Callable[[int], None]]:
+    created_ids: list[int] = []
 
     def add_id(customer_id: int) -> None:
         created_ids.append(customer_id)
@@ -23,9 +31,11 @@ def cleanup_customer(customers_client) -> Generator[Callable[[int], None], None,
         _delete_customer(customers_client, customer_id)
 
 
-@pytest.fixture()
-def default_customer(customers_client) -> Generator[CustomerCreateRequest, None, None]:
-    customer = CustomerFactory().create_required_api()
+@pytest.fixture
+def default_customer(
+    customers_client: CustomersClient,
+) -> Generator[CustomerCreateRequest]:
+    customer = CustomerFactory.create_required_api()
     response = customers_client.create_customer(customer)
 
     yield customer
@@ -33,15 +43,19 @@ def default_customer(customers_client) -> Generator[CustomerCreateRequest, None,
     _delete_customer(customers_client, response.customerId)
 
 
-def _delete_customer(customers_client, customer_id: int) -> None:
+def _delete_customer(customers_client: CustomersClient, customer_id: int) -> None:
     try:
         customers_client.delete_customer(customer_id)
     except Exception as e:
-        print(f"\n[Teardown Warning] Failed to delete customer {customer_id}: {e}")
+        logger.warning(
+            "[Teardown Warning] Failed to delete customer %s: %s", customer_id, e
+        )
 
 
 @pytest.fixture
-def default_product(products_client) -> Generator[ProductResponse, None, None]:
+def default_product(
+    products_client: ProductsClient,
+) -> Generator[ProductResponse]:
     product = ProductFactory().create_base_product()
     response = products_client.create_product(product)
     product_id = response.productId
@@ -54,7 +68,7 @@ def default_product(products_client) -> Generator[ProductResponse, None, None]:
             },
             "shortDescriptions": {"en-US": "This is a mug."},
             "priceTaxExcluded": 10.0,
-            "reference": "test_mug",
+            "reference": f"test_mug_{product_id}",
         }
 
         patch_response = products_client.update_product(product_id, baseline_patch_data)
@@ -65,45 +79,22 @@ def default_product(products_client) -> Generator[ProductResponse, None, None]:
         try:
             products_client.delete_product(product_id)
         except Exception as e:
-            print(f"\n[Teardown Warning] Failed to delete product {product_id}: {e}")
+            logger.warning(
+                "[Teardown Warning] Failed to delete product %s: %s", product_id, e
+            )
 
 
 @pytest.fixture
-def get_order_info(page) -> Callable[[int], OrderResponse]:
+def get_order_info(page: Page) -> Callable[[int], OrderResponse]:
 
     def _make_request(order_id: int) -> OrderResponse:
-        url = BaseClient().build_url(f"orderhistory?id_order={order_id}")
-        response = page.request.get(url)
+        url = BaseClient(create_session=False).build_url(
+            f"orderhistory?id_order={order_id}"
+        )
+        response = page.request.get(url, timeout=30_000)
         assert (
             response.ok
         ), f"Failed to fetch order info: {response.status} {response.text()}"
         return OrderResponse.model_validate(response.json())
 
     return _make_request
-
-
-@pytest.fixture
-def get_account_info(page) -> Callable[[], dict[str, Any]]:
-    def _make_request() -> dict[str, Any]:
-        url = BaseClient().build_url("accountInfo")
-        response = page.request.get(url)
-
-        assert (
-            response.ok
-        ), f"Failed to fetch account info: {response.status} {response.text()}"
-        return response.json()
-
-    return _make_request
-
-
-@pytest.fixture
-def login_user(page) -> Callable[[str, str], APIResponse]:
-    def _login(email: str, password: str) -> APIResponse:
-        response = page.request.post(
-            f"{BaseClient().build_url('login')}",
-            data={"email": email, "password": password},
-        )
-        assert response.ok, f"Login failed: {response.status} {response.text()}"
-        return response
-
-    return _login

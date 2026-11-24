@@ -1,9 +1,12 @@
+from playwright.sync_api import Page
+
 from pages.base_page import BasePage
 
 
 class ProductPage(BasePage):
-    def __init__(self, page) -> None:
+    def __init__(self, page: Page, endpoint: str = "") -> None:
         super().__init__(page)
+        self.endpoint = endpoint
 
         self.main_product_block = self.page.locator(".product__container")
         self.product_title = self.main_product_block.locator(".product__name")

@@ -1,12 +1,15 @@
-from typing import TYPE_CHECKING
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Self
+
 from playwright.sync_api import Page
-from typing import Self
-from config.utils import url_joiner, get_env
-from test_data.product_test_data import TestCategory, ACCESSORIES
+
+from config.utils import get_env, url_joiner
+from test_data.product_test_data import ACCESSORIES, TestCategory
 
 if TYPE_CHECKING:
     from pages.login_page import LoginPage
-    from pages.category_page import CategoryPage
+    from pages.product_listing_page import ProductListingPage
 
 
 class BasePage:
@@ -78,8 +81,8 @@ class BasePage:
         self,
         category: TestCategory = ACCESSORIES,
         subcategory: TestCategory | None = None,
-    ) -> CategoryPage:
-        from pages.category_page import CategoryPage
+    ) -> ProductListingPage:
+        from pages.product_listing_page import ProductListingPage
 
         top_menu = self.top_menu.get_by_role(
             "link", name=f"{category.name}", exact=True
@@ -92,4 +95,4 @@ class BasePage:
             ).click()
         else:
             top_menu.click()
-        return CategoryPage(self.page)
+        return ProductListingPage(self.page)

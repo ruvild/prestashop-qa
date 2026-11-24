@@ -1,8 +1,10 @@
+from playwright.sync_api import Page
+
 from pages.base_page import BasePage
 
 
 class OrderConfirmationPage(BasePage):
-    def __init__(self, page):
+    def __init__(self, page: Page) -> None:
         super().__init__(page)
 
         self.common_prefix = "order-confirmation__"

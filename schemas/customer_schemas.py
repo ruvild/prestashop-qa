@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class CustomerRegistrationUI(BaseModel):
@@ -53,7 +54,6 @@ class CustomerCreateRequest(BaseModel):
     defaultGroupId: int
     groupIds: list[int]
     genderId: int | None = None
-    newsletterSubscribed: bool = False
     partnerOffersSubscribed: bool = False
     birthday: str | None = None
     companyName: str | None = None
@@ -85,3 +85,9 @@ class CustomerCreateResponse(BaseModel):
     maxPaymentDays: int
     riskId: int
     guest: bool
+
+
+class CustomerPatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool | None = None

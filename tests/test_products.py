@@ -1,14 +1,15 @@
+import re
+
+import pytest
+from playwright.sync_api import expect
+from requests import HTTPError
+
+from config.utils import binshops_product_extractor, product_url_parser
 from pages.base_page import BasePage
 from pages.home_page import HomePage
-from pages.category_page import CategoryPage
+from pages.product_listing_page import ProductListingPage
 from pages.product_page import ProductPage
-from playwright.sync_api import expect
-from test_data.product_test_data import HOME_ACCESSORIES
-from test_data.product_test_data import ProductTestData
-from config.utils import binshops_product_extractor
-import pytest
-from config.utils import product_url_parser
-import re
+from test_data.product_test_data import HOME_ACCESSORIES, ProductTestData
 
 
 @pytest.mark.smoke
@@ -26,7 +27,7 @@ def test_product_navigation(page, products_client):
     product_id: int = product_url_data["product_id"]
     product_data = products_client.get_product(product_id)
 
-    assert product_name == product_data["names"]["en-US"]
+    assert product_name == product_data.names["en-US"]
 
 
 @pytest.mark.regression
@@ -47,25 +48,27 @@ def test_product_quick_view(page):
 @pytest.mark.smoke
 @pytest.mark.hybrid
 def test_new_product(page, default_product):
+    home_page = HomePage(page).navigate()
+    expect(home_page.latest_arrivals_block).to_be_visible()
 
-    current_page = HomePage(page).navigate()
-    new_product_banner = current_page.get_product_from_new_arrivals(
-        default_product.productId
-    )
-    expect(new_product_banner).to_be_visible()
+    new_products_page = home_page.navigate_to_new_products()
+    expect(page).to_have_url(new_products_page.url)
+    expect(
+        new_products_page.get_product_card(default_product.productId)
+    ).to_be_visible()
 
 
 @pytest.mark.smoke
 @pytest.mark.hybrid
 def test_out_of_stock_product_ui(page, default_product):
-    home_page = HomePage(page).navigate()
-    product_card = home_page.get_product_from_new_arrivals(default_product.productId)
+    product_slug = re.sub(
+        r"[^a-z0-9]+", "-", default_product.names["en-US"].lower()
+    ).strip("-")
+    product_page = ProductPage(
+        page, endpoint=f"{default_product.productId}-{product_slug}.html"
+    ).navigate()
 
-    expect(product_card).to_be_visible()
-    expect(home_page.get_add_to_cart_button(product_card)).to_have_count(0)
-
-    product_page = home_page.navigate_to_product_page(product_card)
-
+    expect(product_page.product_title).to_have_text(default_product.names["en-US"])
     expect(product_page.add_to_cart_button).to_be_visible()
     expect(product_page.add_to_cart_button).to_be_disabled()
 
@@ -87,14 +90,10 @@ def test_filters_ui(page, category_products_client, subcategory=HOME_ACCESSORIES
     response = category_products_client.search_category_products(subcategory)
     filtered_products_ids_api = set(binshops_product_extractor("id_product", response))
 
-    category_page = CategoryPage(page)
-    expect(category_page.filtered_products).to_have_count(
-        len(filtered_products_ids_api)
-    )
+    listing_page = ProductListingPage(page)
+    expect(listing_page.filtered_products).to_have_count(len(filtered_products_ids_api))
 
-    filtered_products_ids_ui = category_page.get_filtered_products_ids()
-
-    assert filtered_products_ids_ui == filtered_products_ids_api
+    filtered_products_ids_ui = listing_page.get_filtered_products_ids()
 
     assert filtered_products_ids_ui == filtered_products_ids_api
 
@@ -159,7 +158,7 @@ def test_price_filters_no_match_api(
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_ERROR)
 def test_product_search_error(query, product_search_client):
     response = product_search_client.search_products(query=query)
-    assert response["success"] is False
+    assert response.success is False
 
 
 @pytest.mark.regression
@@ -167,7 +166,8 @@ def test_product_search_error(query, product_search_client):
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_NO_MATCHES)
 def test_product_search_no_matches(query, product_search_client):
     response = product_search_client.search_products(query=query)
-    assert not response["psdata"]["products"]
+    assert response.psdata is not None
+    assert not response.psdata.products
 
 
 @pytest.mark.regression
@@ -205,8 +205,9 @@ def test_product_sorting(field, sort_order, product_search_client):
 @pytest.mark.regression
 @pytest.mark.hybrid
 def test_product_color_selection(page, products_client):
-    product_page = ProductPage(page)
-    page.goto(f"{product_page.base_url}1-1-hummingbird-printed-t-shirt.html")
+    product_page = ProductPage(
+        page, endpoint="1-1-hummingbird-printed-t-shirt.html"
+    ).navigate()
 
     product_page.black_color_option.click()
     expect(page).to_have_url(re.compile(r"color-black"))
@@ -220,14 +221,14 @@ def test_product_color_selection(page, products_client):
 
     expect(product_page.size_dropdown).to_have_value(size_id)
 
-    combination_id: str = product_url_data["combination_id"]
+    combination_id: int | None = product_url_data["combination_id"]
+    assert combination_id is not None, "Combination ID missing from product URL"
     product_api_data = products_client.search_product_combination(combination_id)
 
-    assert product_url_data["product_id"] == product_api_data["productId"]
-    assert product_api_data["combinationId"] == combination_id
+    assert product_url_data["product_id"] == product_api_data.productId
+    assert product_api_data.combinationId == combination_id
     assert (
-        product_api_data["name"].lower()
-        == f"size - {size_value}, color - {color_value}"
+        product_api_data.name.lower() == f"size - {size_value}, color - {color_value}"
     )
 
 
@@ -248,3 +249,60 @@ def test_pagination_api(product_search_client):
 
     assert 0 < len(page_2_ids) <= len(page_1_ids) == results_per_page
     assert page_1_ids.isdisjoint(page_2_ids)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+def test_nonexistent_product_id_api(products_client):
+    product_id = ProductTestData.NON_EXISTENT_PRODUCT_ID
+    combination_id = ProductTestData.NON_EXISTENT_COMBINATION_ID
+
+    with pytest.raises(HTTPError) as get_exc:
+        products_client.get_product(product_id)
+    assert get_exc.value.response is not None
+    assert get_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as patch_exc:
+        products_client.update_product(product_id, {"enabled": True})
+    assert patch_exc.value.response is not None
+    assert patch_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as delete_exc:
+        products_client.delete_product(product_id)
+    assert delete_exc.value.response is not None
+    assert delete_exc.value.response.status_code == 404
+
+    with pytest.raises(HTTPError) as comb_exc:
+        products_client.search_product_combination(combination_id)
+    assert comb_exc.value.response is not None
+    assert comb_exc.value.response.status_code == 404
+
+
+@pytest.mark.regression
+@pytest.mark.api
+@pytest.mark.xfail(
+    reason="BUG: PrestaShop Admin API returns 500 instead of 400/422 for invalid product IDs",
+    strict=True,
+)
+@pytest.mark.parametrize("product_id", ProductTestData.INVALID_PRODUCT_IDS)
+def test_invalid_product_id_api(product_id, products_client):
+    with pytest.raises(HTTPError) as exc_info:
+        products_client.get_product(product_id)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code in (400, 422)
+
+
+@pytest.mark.regression
+@pytest.mark.api
+@pytest.mark.xfail(
+    reason="BUG: PrestaShop Admin API returns 500 instead of 400/422 for invalid combination IDs",
+    strict=True,
+)
+@pytest.mark.parametrize("combination_id", ProductTestData.INVALID_PRODUCT_IDS)
+def test_invalid_combination_id_api(combination_id, products_client):
+    with pytest.raises(HTTPError) as exc_info:
+        products_client.search_product_combination(combination_id)
+
+    assert exc_info.value.response is not None
+    assert exc_info.value.response.status_code in (400, 422)

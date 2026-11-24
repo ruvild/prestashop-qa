@@ -1,10 +1,13 @@
+from typing import Self
+
+from playwright.sync_api import Page
+
 from pages.base_page import BasePage
 from pages.registration_page import RegistrationPage
-from typing import Self
 
 
 class LoginPage(BasePage):
-    def __init__(self, page) -> None:
+    def __init__(self, page: Page) -> None:
         super().__init__(page)
         self.endpoint = "login"
 
@@ -16,15 +19,15 @@ class LoginPage(BasePage):
         )
         self.auth_fail_alert = self.page.get_by_role("alert")
 
-    def sign_in(self, email, password) -> BasePage:
+    def sign_in(self, email: str, password: str) -> BasePage:
         self.email.fill(email)
         self.password.fill(password)
         self.sign_in_button.click()
         return BasePage(self.page)
 
-    def sign_in_with_invalid_password(self, email, password) -> Self:
+    def attempt_sign_in(self, email: str, password: str) -> Self:
         self.email.fill(email)
-        self.password.fill(password + "e")
+        self.password.fill(password)
         self.sign_in_button.click()
         return self
 

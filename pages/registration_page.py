@@ -1,11 +1,14 @@
+from typing import Self
+
+from playwright.sync_api import Page
+
 from pages.base_page import BasePage
 from schemas.customer_schemas import CustomerRegistrationUI
-from typing import Self
 
 
 class RegistrationPage(BasePage):
 
-    def __init__(self, page) -> None:
+    def __init__(self, page: Page) -> None:
         super().__init__(page)
         self.endpoint = "registration"
 
@@ -20,10 +23,11 @@ class RegistrationPage(BasePage):
         self.terms_and_conditions = self.page.locator("#field-psgdpr")
         self.newsletter = self.page.locator("#field-newsletter")
         self.create_account = self.page.get_by_role("button", name="Create account")
+        self.error_alert = self.page.get_by_role("alert")
 
-    def register_valid(
+    def _fill_and_submit(
         self, customer: CustomerRegistrationUI, optionals: bool = False
-    ) -> BasePage:
+    ) -> None:
         self.first_name.fill(customer.first_name)
         self.last_name.fill(customer.last_name)
         self.email.fill(customer.email)
@@ -34,11 +38,22 @@ class RegistrationPage(BasePage):
         if optionals:
             self.gender_mr.check()
             self.birthdate.fill(customer.birthdate)
-            self.offers.click()
-            self.newsletter.click()
+            self.offers.check()
+            self.newsletter.check()
 
         self.create_account.click()
+
+    def register_valid(
+        self, customer: CustomerRegistrationUI, optionals: bool = False
+    ) -> BasePage:
+        self._fill_and_submit(customer, optionals=optionals)
         return BasePage(self.page)
+
+    def attempt_register(
+        self, customer: CustomerRegistrationUI, optionals: bool = False
+    ) -> Self:
+        self._fill_and_submit(customer, optionals=optionals)
+        return self
 
     def register_empty(self) -> Self:
         self.create_account.click()

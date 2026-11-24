@@ -1,19 +1,24 @@
+from playwright.sync_api import Locator, Page
+
 from pages.base_page import BasePage
-from playwright.sync_api import Locator
-from pages.product_page import ProductPage
 from pages.cart_page import CartPage
+from pages.product_listing_page import ProductListingPage
+from pages.product_page import ProductPage
 
 ADD_TO_CART_BUTTON = '[data-button-action="add-to-cart"]'
 
 
 class HomePage(BasePage):
-    def __init__(self, page) -> None:
+    def __init__(self, page: Page) -> None:
         super().__init__(page)
 
         self.carousel = page.get_by_label("Carousel container")
         self.featured_products_block = page.locator(".ps-featuredproducts")
         self.special_deals_block = page.locator(".ps-specials")
         self.latest_arrivals_block = page.locator(".ps-newproducts")
+        self.all_new_products_button = self.latest_arrivals_block.get_by_role(
+            "link", name="All new products"
+        )
         self.featured_product = self.featured_products_block.locator(
             ".product-miniature"
         ).first
@@ -34,8 +39,9 @@ class HomePage(BasePage):
     def get_featured_product(self) -> Locator:
         return self.featured_product
 
-    def get_product_from_new_arrivals(self, product_id: int) -> Locator:
-        return self.latest_arrivals_block.locator(f"[data-id-product='{product_id}']")
+    def navigate_to_new_products(self) -> ProductListingPage:
+        self.all_new_products_button.click()
+        return ProductListingPage(self.page, endpoint="new-products")
 
     def open_quick_view(self) -> Locator:
         self.featured_product.hover()
@@ -43,7 +49,7 @@ class HomePage(BasePage):
         return self.quick_view_dialog
 
     def navigate_to_product_page(self, product_locator: Locator) -> ProductPage:
-        product_locator.click()
+        product_locator.locator(".product-miniature__title").click()
         return ProductPage(self.page)
 
     def navigate_to_product_page_via_quick_view(self) -> ProductPage:
@@ -53,9 +59,6 @@ class HomePage(BasePage):
     def add_product_to_cart(self, product: Locator) -> Locator:
         product.locator(ADD_TO_CART_BUTTON).click()
         return self.added_to_cart_popup
-
-    def get_add_to_cart_button(self, product_card: Locator) -> Locator:
-        return product_card.locator(ADD_TO_CART_BUTTON)
 
     def proceed_to_checkout(self) -> CartPage:
         self.proceed_to_checkout_button.click()

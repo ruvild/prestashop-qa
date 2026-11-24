@@ -1,8 +1,13 @@
-from config.utils import get_env
-import subprocess
-import requests
-import time
+import logging
 import os
+import subprocess
+import time
+
+import requests
+
+from config.utils import get_env
+
+logger = logging.getLogger(__name__)
 
 BASE_URL = get_env("BASE_URL")
 BINSHOPS_REPO = "https://github.com/binshops/prestashop-rest.git"
@@ -17,14 +22,20 @@ WHERE name='PS_ADMIN_API_FORCE_DEBUG_SECURED'
 
 
 def ensure_environment() -> None:
+    if not logging.getLogger().handlers:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        )
+
     _ensure_playwright_browsers()
     _ensure_binshops_module()
 
     if _is_environment_up():
-        print("Environment already running. Skipping container setup...")
+        logger.info("Environment already running. Skipping container setup...")
         return
 
-    print("Starting Docker...")
+    logger.info("Starting Docker...")
     subprocess.run(
         ["docker", "compose", "up", "-d"],
         check=True,
@@ -35,22 +46,22 @@ def ensure_environment() -> None:
 
 
 def _ensure_playwright_browsers() -> None:
-    print("Checking Playwright browsers...")
+    logger.info("Checking Playwright browsers...")
 
     subprocess.run(
         ["playwright", "install"],
         check=True,
     )
 
-    print("Playwright browsers are ready.")
+    logger.info("Playwright browsers are ready.")
 
 
 def _ensure_binshops_module() -> None:
     if os.path.isdir(BINSHOPS_PATH):
-        print("Binshops REST module already exists. Skipping clone...")
+        logger.info("Binshops REST module already exists. Skipping clone...")
         return
 
-    print("Cloning Binshops REST module...")
+    logger.info("Cloning Binshops REST module...")
     subprocess.run(
         [
             "git",
@@ -63,7 +74,7 @@ def _ensure_binshops_module() -> None:
         check=True,
     )
 
-    print("Binshops REST module cloned.")
+    logger.info("Binshops REST module cloned.")
 
 
 def _is_environment_up() -> bool:
@@ -80,10 +91,10 @@ def _wait_until_ready() -> None:
         try:
             res = requests.get(BASE_URL, timeout=5)
             if res.ok:
-                print("\nPrestaShop is up and responding!")
+                logger.info("PrestaShop is up and responding!")
                 break
         except requests.RequestException:
-            print("Waiting for PrestaShop container initialization...")
+            logger.info("Waiting for PrestaShop container initialization...")
 
         if time.time() - start > 300:
             raise TimeoutError("PrestaShop failed to start within 5 minutes.")
@@ -101,9 +112,9 @@ def _disable_admin_security() -> None:
             "mysql",
             "mysql",
             "-u",
-            f"{os.getenv('DB_USER')}",
-            f"-p{os.getenv('DB_ROOT_PASSWORD')}",
-            f"{os.getenv('DB_NAME')}",
+            get_env("DB_USER"),
+            f"-p{get_env('DB_ROOT_PASSWORD')}",
+            get_env("DB_NAME"),
             "-e",
             SQL_DISABLE_ADMIN_SECURITY,
         ],
@@ -113,4 +124,4 @@ def _disable_admin_security() -> None:
     if result.returncode != 0:
         raise Exception(result.stderr)
 
-    print("Admin API security check disabled.")
+    logger.info("Admin API security check disabled.")

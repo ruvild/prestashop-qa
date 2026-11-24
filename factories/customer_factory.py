@@ -1,6 +1,8 @@
-from faker import Faker
-from schemas.customer_schemas import CustomerRegistrationUI, CustomerCreateRequest
 import random
+
+from faker import Faker
+
+from schemas.customer_schemas import CustomerCreateRequest, CustomerRegistrationUI
 
 fake = Faker()
 
@@ -39,7 +41,6 @@ class CustomerFactory:
         customer = CustomerFactory.create_required_api()
         customer.groupIds = [1, 2, 3]
         customer.genderId = 1
-        customer.newsletterSubscribed = True
         customer.partnerOffersSubscribed = True
         customer.birthday = fake.date_of_birth(
             minimum_age=18, maximum_age=100

@@ -34,8 +34,9 @@ A containerized testing framework for **PrestaShop** (with the additional **Bins
 
 * **Isolated Container Environment:** Spins up local PrestaShop and MySQL containers automatically via `compose.yaml`.
 * **Hybrid Testing Strategy:** Blends fast API setup/teardown validations (using Pydantic models/schemas) with deep UI automation using the Page Object Model (POM).
-* **Parallel Execution & Cross-Browser:** Built to run tests across Chromium, Firefox, and WebKit simultaneously via `pytest-xdist`.
-* **Automated CI/CD:** GitHub Actions pipeline features intelligent caching for Playwright dependencies and automatic artifact capture (failure screenshots, server logs, and HTML reports). The test suite runs automatically on every push or pull request via GitHub Actions.
+* **Parallel Execution & Cross-Browser:** Built to run tests across Chromium, Firefox, and WebKit simultaneously via `pytest-xdist`, with per-worker Admin API OAuth clients provisioned dynamically.
+* **Seeded Demo Storefront:** Catalog, category, and search tests run against PrestaShop's default seeded demo data in a fresh container, while dynamically created customers and products are cleaned up per test.
+* **Automated CI/CD:** GitHub Actions pipeline features a static lint/format pre-check (`ruff` + `black`), intelligent caching for Playwright dependencies, and automatic artifact capture (failure screenshots and Playwright traces, server logs, and HTML reports). The test suite runs automatically on pull requests targeting `main` and can also be triggered manually via `workflow_dispatch` in GitHub Actions.
 
 ![GitHub Actions Pipeline Run](docs/assets/ci_pipeline_steps.png)
 
@@ -58,17 +59,20 @@ prestashop-qa/
 ├── scripts/                    # Environment provisioning & API client initialization scripts
 ├── test_data/                  # Test data and predefined input values
 ├── tests/                      # UI & API test modules, test data, and scoped fixtures
+├── .env.example                # Environment variable template
 ├── .gitignore                  # Git tracking rules
 ├── compose.yaml                # PrestaShop & MySQL container orchestration
 ├── conftest.py                 # Global Pytest fixtures, CI auto-provisioning, and OAuth tokens
+├── pyproject.toml              # Ruff linting and Black formatting configuration
 ├── pytest.ini                  # Pytest flags, HTML reporting configs, and execution rules
-└── requirements.txt            # Python dependencies
+├── requirements-dev.txt        # Optional local linting and formatting dependencies
+└── requirements.txt            # Python runtime dependencies
 ```
 # 🛠️ Prerequisites & Setup
 
 ## Requirements
 
-- Python **3.14**
+- Python **3.14+**
 - Docker Engine **29.0+**
 - Docker Compose **5.0+**
 
@@ -83,18 +87,24 @@ cd prestashop-qa
 pip install -r requirements.txt
 ```
 
+Optionally install linting and formatting tools (`ruff` and `black`) for local development:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
 ## 2. Configure Environment Variables
 
-Create a `.env` file in the project root with the required environment variables:
+Copy `.env.example` to `.env` in the project root and adjust the values if needed:
 
 ```dotenv
 BASE_URL=http://localhost:8080/
-DB_NAME=your_database_name
-DB_USER=your_database_user
+DB_NAME=prestashop
+DB_USER=root
 DB_ROOT_PASSWORD=your_database_root_password
 ```
 
-These variables are used by the environment provisioning.
+These variables are used by Docker Compose and the environment provisioning scripts.
 
 ## 3. Environment Provisioning
 
@@ -145,6 +155,26 @@ pytest -n auto
 
 ```bash
 pytest --browser chromium
+```
+
+## Run Tests by Marker
+
+The suite defines markers in `pytest.ini` (`smoke`, `regression`, `ui`, `api`, `hybrid`):
+
+```bash
+pytest -m smoke
+pytest -m api
+pytest -m "ui or hybrid"
+pytest -m regression
+```
+
+## Linting & Formatting
+
+Check code style and formatting locally with `ruff` and `black` (configured in `pyproject.toml`):
+
+```bash
+ruff check .
+black --check .
 ```
 
 ## HTML Test Reports
