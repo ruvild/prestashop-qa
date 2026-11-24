@@ -63,8 +63,10 @@ prestashop-qa/
 ├── .gitignore                  # Правила отслеживания файлов в Git
 ├── compose.yaml                # Конфигурация контейнеров PrestaShop и MySQL
 ├── conftest.py                 # Глобальные фикстуры Pytest, автонастройка для CI и OAuth-токены
+├── pyproject.toml              # Конфигурация линтера Ruff и форматтера Black
 ├── pytest.ini                  # Флаги Pytest, настройки отчетов HTML и правила запуска
-└── requirements.txt            # Зависимости Python
+├── requirements-dev.txt        # Опциональные зависимости для линтинга и форматирования
+└── requirements.txt            # Зависимости Python для запуска тестов
 ```
 # 🛠️ Предварительные требования и настройка
 

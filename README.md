@@ -63,14 +63,16 @@ prestashop-qa/
 ├── .gitignore                  # Git tracking rules
 ├── compose.yaml                # PrestaShop & MySQL container orchestration
 ├── conftest.py                 # Global Pytest fixtures, CI auto-provisioning, and OAuth tokens
+├── pyproject.toml              # Ruff linting and Black formatting configuration
 ├── pytest.ini                  # Pytest flags, HTML reporting configs, and execution rules
-└── requirements.txt            # Python dependencies
+├── requirements-dev.txt        # Optional local linting and formatting dependencies
+└── requirements.txt            # Python runtime dependencies
 ```
 # 🛠️ Prerequisites & Setup
 
 ## Requirements
 
-- Python **3.14**
+- Python **3.14+**
 - Docker Engine **29.0+**
 - Docker Compose **5.0+**
 
