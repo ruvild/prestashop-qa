@@ -4,7 +4,9 @@ from requests import Response
 
 from clients.admin_api.base_client import BaseClient
 from schemas.product_schemas import (
+    ProductCombinationResponse,
     ProductCreateRequest,
+    ProductListResponse,
     ProductPatchRequest,
     ProductResponse,
 )
@@ -18,11 +20,11 @@ class ProductsClient(BaseClient):
         super().__init__(auth_token)
         self.endpoint = "products"
 
-    def get_product(self, product_id: int) -> dict:
+    def get_product(self, product_id: int) -> ProductResponse:
         url = self.build_url(f"{self.endpoint}/{product_id}")
         res = self.session.get(url, headers=self.auth_header, timeout=self.timeout)
         res.raise_for_status()
-        return res.json()
+        return ProductResponse.model_validate(res.json())
 
     def create_product(self, product: ProductCreateRequest) -> ProductResponse:
         url = self.build_url(self.endpoint)
@@ -68,16 +70,18 @@ class ProductsClient(BaseClient):
         res = self.session.get(url, headers=self.auth_header, timeout=self.timeout)
         res.raise_for_status()
 
-        data: dict = res.json()
+        data = ProductListResponse.model_validate(res.json())
         return {
-            product["productId"]
-            for product in data["items"]
-            if product["category"] == category.name
+            product.productId
+            for product in data.items
+            if product.category == category.name
         }
 
-    def search_product_combination(self, combination_id: int) -> dict:
+    def search_product_combination(
+        self, combination_id: int
+    ) -> ProductCombinationResponse:
         url = self.build_url(f"{self.endpoint}/combinations/{combination_id}")
         res = self.session.get(url, headers=self.auth_header, timeout=self.timeout)
         res.raise_for_status()
 
-        return res.json()
+        return ProductCombinationResponse.model_validate(res.json())

@@ -1,8 +1,7 @@
 from playwright.sync_api import APIRequestContext
 
 from clients.binshops.base_client import BaseClient
-from schemas.cart_schemas import CartResponse
-from test_data.product_test_data import ProductToCart
+from schemas.cart_schemas import CartResponse, ProductToCart
 
 
 class CartClient(BaseClient):

@@ -6,15 +6,12 @@ from playwright.sync_api import expect
 from config.utils import get_order_id_from_url, stock_changer
 from pages.cart_page import CartPage
 from pages.home_page import HomePage
+from schemas.cart_schemas import ProductToCart
 from test_data.customer_test_data import (
     DEFAULT_ADDRESS_DATA,
     INVALID_POSTCODE_ADDRESS_DATA,
 )
-from test_data.product_test_data import (
-    ADD_PRODUCT_TO_CART,
-    ProductTestData,
-    ProductToCart,
-)
+from test_data.product_test_data import ADD_PRODUCT_TO_CART, ProductTestData
 
 
 @pytest.mark.smoke

@@ -6,6 +6,8 @@ from urllib.parse import parse_qs, urljoin, urlparse
 
 from dotenv import load_dotenv
 
+from schemas.product_schemas import BinshopsProductListResponse
+
 load_dotenv()
 
 
@@ -29,9 +31,10 @@ def extract_product_ids(id_list: list[str | None]) -> list[int]:
 
 
 def binshops_product_extractor(
-    field: str, search_response: dict[str, Any]
+    field: str, search_response: BinshopsProductListResponse
 ) -> list[Any]:
-    return [product[field] for product in search_response["psdata"]["products"]]
+    assert search_response.psdata is not None, "Missing psdata in search response"
+    return [getattr(product, field) for product in search_response.psdata.products]
 
 
 def product_url_parser(url: str) -> dict[str, Any]:

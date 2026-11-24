@@ -39,3 +39,39 @@ class ProductResponse(ProductCreateRequest):
     availableForOrder: bool
     reference: str
     categories: list[ProductCategory]
+
+
+class ProductListItem(BaseModel):
+    productId: int
+    category: str
+
+
+class ProductListResponse(BaseModel):
+    items: list[ProductListItem]
+
+
+class ProductCombinationResponse(BaseModel):
+    combinationId: int
+    productId: int
+    name: str
+    default: bool
+    quantity: int
+    reference: str
+
+
+class BinshopsProduct(BaseModel):
+    id_product: int
+    name: str
+    price: str
+    position: str | None = None
+
+
+class BinshopsProductData(BaseModel):
+    products: list[BinshopsProduct]
+
+
+class BinshopsProductListResponse(BaseModel):
+    code: int
+    success: bool
+    psdata: BinshopsProductData | None = None
+    message: str | None = None

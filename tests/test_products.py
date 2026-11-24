@@ -27,7 +27,7 @@ def test_product_navigation(page, products_client):
     product_id: int = product_url_data["product_id"]
     product_data = products_client.get_product(product_id)
 
-    assert product_name == product_data["names"]["en-US"]
+    assert product_name == product_data.names["en-US"]
 
 
 @pytest.mark.regression
@@ -158,7 +158,7 @@ def test_price_filters_no_match_api(
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_ERROR)
 def test_product_search_error(query, product_search_client):
     response = product_search_client.search_products(query=query)
-    assert response["success"] is False
+    assert response.success is False
 
 
 @pytest.mark.regression
@@ -166,7 +166,8 @@ def test_product_search_error(query, product_search_client):
 @pytest.mark.parametrize("query", ProductTestData.SEARCH_QUERIES_NO_MATCHES)
 def test_product_search_no_matches(query, product_search_client):
     response = product_search_client.search_products(query=query)
-    assert not response["psdata"]["products"]
+    assert response.psdata is not None
+    assert not response.psdata.products
 
 
 @pytest.mark.regression
@@ -224,11 +225,10 @@ def test_product_color_selection(page, products_client):
     assert combination_id is not None, "Combination ID missing from product URL"
     product_api_data = products_client.search_product_combination(combination_id)
 
-    assert product_url_data["product_id"] == product_api_data["productId"]
-    assert product_api_data["combinationId"] == combination_id
+    assert product_url_data["product_id"] == product_api_data.productId
+    assert product_api_data.combinationId == combination_id
     assert (
-        product_api_data["name"].lower()
-        == f"size - {size_value}, color - {color_value}"
+        product_api_data.name.lower() == f"size - {size_value}, color - {color_value}"
     )
 
 
